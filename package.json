@@ -1,46 +1,41 @@
 {
-  "name": "se-2",
-  "version": "0.0.1",
+  "name": "crypto-cartel",
   "private": true,
-  "workspaces": {
-    "packages": [
-      "packages/hardhat",
-      "packages/nextjs"
-    ]
-  },
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "account": "yarn workspace @se-2/hardhat account",
-    "chain": "yarn workspace @se-2/hardhat chain",
-    "fork": "yarn workspace @se-2/hardhat fork",
-    "deploy": "yarn workspace @se-2/hardhat deploy",
-    "verify": "yarn workspace @se-2/hardhat verify",
-    "hardhat-verify": "yarn workspace @se-2/hardhat hardhat-verify",
-    "compile": "yarn workspace @se-2/hardhat compile",
-    "generate": "yarn workspace @se-2/hardhat generate",
-    "flatten": "yarn workspace @se-2/hardhat flatten",
-    "hardhat:lint": "yarn workspace @se-2/hardhat lint",
-    "hardhat:lint-staged": "yarn workspace @se-2/hardhat lint-staged",
-    "hardhat:format": "yarn workspace @se-2/hardhat format",
-    "hardhat:test": "yarn workspace @se-2/hardhat test",
-    "test": "yarn hardhat:test",
-    "format": "yarn next:format && yarn hardhat:format",
-    "start": "yarn workspace @se-2/nextjs dev",
-    "next:lint": "yarn workspace @se-2/nextjs lint",
-    "next:format": "yarn workspace @se-2/nextjs format",
-    "next:check-types": "yarn workspace @se-2/nextjs check-types",
-    "next:build": "yarn workspace @se-2/nextjs build",
-    "next:serve": "yarn workspace @se-2/nextjs serve",
-    "postinstall": "husky install",
-    "precommit": "lint-staged",
-    "vercel": "yarn workspace @se-2/nextjs vercel",
-    "vercel:yolo": "yarn workspace @se-2/nextjs vercel:yolo"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
   },
-  "packageManager": "yarn@3.2.3",
+  "dependencies": {
+    "@firebase/app": "^0.10.13",
+    "@firebase/auth": "^1.7.9",
+    "@firebase/firestore": "^4.7.3",
+    "@tanstack/react-query": "^5.51.1",
+    "@types/node": "^22.7.5",
+    "@web3modal/wagmi": "^5.0.6",
+    "ethers": "^6.13.1",
+    "firebase": "^10.14.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.24.1",
+    "viem": "2.x",
+    "wagmi": "^2.10.10",
+    "zustand": "^5.0.0-rc.2"
+  },
   "devDependencies": {
-    "husky": "^8.0.1",
-    "lint-staged": "^13.0.3"
-  },
-  "engines": {
-    "node": ">=18.18.0"
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.1",
+    "@typescript-eslint/parser": "^7.13.1",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.7",
+    "sass": "^1.77.8",
+    "typescript": "^5.2.2",
+    "vite": "^5.3.1"
   }
 }

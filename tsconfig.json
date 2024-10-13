@@ -1,0 +1,20 @@
+{
+  "files": [],
+  "compilerOptions": {
+    "jsx": "react",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es5",
+    "lib": ["dom", "es2015"]
+    // Other compiler options
+  },
+  // Other settings
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
+}
