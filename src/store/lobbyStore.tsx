@@ -1,21 +1,19 @@
-// store/lobbyStore.tsx
-import { create } from 'zustand';
+import { create } from 'zustand'
 
 interface GameState {
-  id: string;
-  name: string;
-  players: string[];
-  // ... other game properties as needed
+  id: string
+  name: string
+  players: string[]
+  creator: string
 }
 
 interface LobbyStore {
-  games: GameState[];
-  currentGame: GameState | null;
-  playerName: string;
-  setGames: (newGames: GameState[]) => void;
-  setCurrentGame: (game: GameState | null) => void;
-  setPlayerName: (name: string) => void;
-  // ... add more actions (joinGame, createGame) as needed 
+  games: GameState[]
+  currentGame: GameState | null
+  playerName: string
+  setGames: (newGames: GameState[]) => void
+  setCurrentGame: (game: GameState | null) => void
+  setPlayerName: (name: string) => void
 }
 
 const useLobbyStore = create<LobbyStore>((set) => ({
@@ -26,7 +24,6 @@ const useLobbyStore = create<LobbyStore>((set) => ({
   setGames: (newGames) => set({ games: newGames }),
   setCurrentGame: (game) => set({ currentGame: game }),
   setPlayerName: (name) => set({ playerName: name }),
-  // ... add more actions as needed
-}));
+}))
 
-export default useLobbyStore;
+export default useLobbyStore

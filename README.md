@@ -1,5 +1,16 @@
 # Crypto-Cartels
 
+# Lobby
+
+Explanation:
+Real-time Game Updates:
+We use onSnapshot from Firestore to listen for real-time updates in the games collection. When a new game is created or a game is updated (e.g., when a player joins), the games state is updated automatically.
+Creating a New Game:
+When a user creates a game, their name is added to the players array, and they are set as the creator (creator: user.uid). The new game is saved in Firestore.
+Joining an Existing Game:
+Players can join a game by clicking the "Join" button. The player's name is added to the players array in Firestore using the arrayUnion function, ensuring they are added without overwriting existing players.
+
+
 ![Crypto-Cartels Logo](./src/assets/logo.png)
 
 ## 📜 Introduction

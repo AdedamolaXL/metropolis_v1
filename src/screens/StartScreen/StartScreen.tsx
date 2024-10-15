@@ -11,6 +11,10 @@ import { parseEther } from 'viem'
 import FirebaseConnectionTest from '../../components/FirebaseConnectionTest'
 import Auth from '../../components/Auth'  // Import the Auth component
 import useAuthStore from '../../store/authStore'  // Import the auth store to get the user state
+import useLobbyStore from '../../store/lobbyStore'  // Import lobby store
+import Lobby from '../Lobby/lobby.tsx'  // Import the Lobby component
+
+// pages/lobby.tsx
 
 interface Player {
   name: string
@@ -25,7 +29,8 @@ const StartScreen: React.FC = () => {
   const [playerCount, setPlayerCount] = useState<number>(2)
   const [playerDetails, setPlayerDetails] = useState<Player[]>([])
   const { sendTransaction } = useSendTransaction()
-  const { user } = useAuthStore()  // Get the current authenticated user
+  const { user } = useAuthStore()
+  const { currentGame, setCurrentGame } = useLobbyStore()  // Get the current game state
 
   const onPlayerDataChange = (property: string, value: string, playerIndex: number) => {
     const updatedPlayerDetails = playerDetails.map((player, index) => {
@@ -104,6 +109,7 @@ const StartScreen: React.FC = () => {
 
   useEffect(() => {
     console.log('Created new game', hash)
+
   }, [hash])
 
   const validateGameSettings = async () => {
@@ -128,6 +134,12 @@ const StartScreen: React.FC = () => {
     }
   }
 
+  // Conditional rendering based on current game state
+  if (!currentGame) {
+    return <Lobby />  // Render the Lobby if no game has been selected
+  }
+
+  // If a game is already selected, render the "Enter Player Details" section
   return (
     <div className="start-screen">
       <div className="game-logo">
