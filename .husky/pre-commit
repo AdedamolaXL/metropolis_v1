@@ -1,4 +1,4 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-yarn lint-staged --verbose
+/home/cyberroninn/.nvm/versions/node/v22.6.0/bin/yarn lint-staged --verbose
