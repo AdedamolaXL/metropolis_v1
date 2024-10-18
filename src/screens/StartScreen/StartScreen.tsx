@@ -2,26 +2,62 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import logo from '../../assets/logo.png'
 import { COLORS, GAME_SETTINGS } from '../../Constants'
-import { monopolyInstance } from '../../models/Monopoly'
 import { showToast } from '../../utilities'
 import './startScreen.scss'
-import { useAccount, useSendTransaction } from 'wagmi'
-import { useFactoryContract } from '../../hooks/useFactoryContract'
-import { parseEther } from 'viem'
+import { useAccount } from 'wagmi'
+import io from 'socket.io-client'
 
 interface Player {
   name: string
   color: string
 }
 
+interface GameState {
+  players: Player[]
+  properties: any[] // Define a proper type for properties if possible
+  currentPlayer: Player | null
+}
+
+const socket = io('http://localhost:4000', {
+  withCredentials: true,
+  extraHeaders: {
+    "my-custom-header": "abcd"
+  }
+});
+
 const StartScreen: React.FC = () => {
   const { address } = useAccount()
-  const { hash, createNewGame } = useFactoryContract()
   const navigate = useNavigate()
   const [countValidated, setCountValidated] = useState(false)
   const [playerCount, setPlayerCount] = useState<number>(2)
   const [playerDetails, setPlayerDetails] = useState<Player[]>([])
-  const { sendTransaction } = useSendTransaction()
+  const [gameState, setGameState] = useState<GameState | null>(null)
+  const [isJoining, setIsJoining] = useState(false)
+
+  useEffect(() => {
+    // Listen for game state updates from the server
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error('Connection error:', error);
+      showToast('Failed to connect to the game server. Please try again later.');
+    });
+
+    socket.on('gameState', (state: GameState) => {
+      setGameState(state)
+      if (state.players.length > 0 && isJoining) {
+        navigate('/game') // Navigate to game screen when players are present and we're joining
+      }
+    })
+
+    return () => {
+      socket.off('connect');
+      socket.off('connect_error');
+      socket.off('gameState');
+    }
+  }, [navigate, isJoining])
 
   const onPlayerDataChange = (property: string, value: string, playerIndex: number) => {
     const updatedPlayerDetails = playerDetails.map((player, index) => {
@@ -98,25 +134,16 @@ const StartScreen: React.FC = () => {
     return inputBoxes
   }
 
-  useEffect(() => {
-    console.log('Created new game', hash)
-  }, [hash])
-
   const validateGameSettings = async () => {
     if (!address) {
       return alert('Please connect your wallet first')
     }
     if (playerDetails) {
       if (playerDetails.every((player) => player.name && player.color)) {
-        sendTransaction({
-          to: '0x8ebE1aa2aE913d81b142028CDCF49517e50135fC',
-          value: parseEther('78'),
-        })
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        monopolyInstance.Players = playerDetails as any
-        await createNewGame(address, '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266')
-        console.log('hash', hash)
-        navigate('/game')
+        setIsJoining(true)
+        // Join the game
+        socket.emit('joinGame', { name: playerDetails[0].name, color: playerDetails[0].color })
+        // Navigation to game screen will happen in useEffect when gameState updates
       } else {
         showToast('Please Enter All Player Details')
       }
@@ -131,7 +158,19 @@ const StartScreen: React.FC = () => {
         <img src={logo} alt="Game Logo" />
       </div>
       <div className="game-form">
-        {countValidated ? (
+        {gameState && gameState.players.length > 0 ? (
+          <div>
+            <h2>Current Players:</h2>
+            <ul>
+              {gameState.players.map((player, index) => (
+                <li key={index}>{player.name} - {player.color}</li>
+              ))}
+            </ul>
+            <button onClick={validateGameSettings} disabled={isJoining}>
+              {isJoining ? 'Joining...' : 'Join Game'}
+            </button>
+          </div>
+        ) : countValidated ? (
           <>
             <label htmlFor="PlayerCount">Enter Player Details</label>
             <div className="player-details-form">
