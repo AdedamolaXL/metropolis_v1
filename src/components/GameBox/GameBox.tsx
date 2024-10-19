@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react'
-import { BOX_TYPES, COMMUNITY_CARDS, RAILROAD_RENTS } from '../../Constants'
+import { BOX_TYPES, COMMUNITY_CARDS, RAILROAD_RENTS } from '../../../backend/shared/Constants'
 import { showToast, curry } from '../../utilities'
 import { monopolyInstance } from '../../models/Monopoly'
 import { ActionPopup } from './ActionPopup'

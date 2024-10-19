@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import logo from '../../assets/logo.png'
-import { COLORS, GAME_SETTINGS } from '../../Constants'
+import { COLORS } from '../../../backend/shared/Constants'
 import { showToast } from '../../utilities'
 import './startScreen.scss'
-import { useAccount } from 'wagmi'
 import io from 'socket.io-client'
 
 interface Player {
@@ -26,16 +25,13 @@ const socket = io('http://localhost:4000', {
 });
 
 const StartScreen: React.FC = () => {
-  const { address } = useAccount()
   const navigate = useNavigate()
-  const [countValidated, setCountValidated] = useState(false)
-  const [playerCount, setPlayerCount] = useState<number>(2)
-  const [playerDetails, setPlayerDetails] = useState<Player[]>([])
+  const [playerName, setPlayerName] = useState('')
+  const [playerColor, setPlayerColor] = useState(COLORS[0])
   const [gameState, setGameState] = useState<GameState | null>(null)
   const [isJoining, setIsJoining] = useState(false)
 
   useEffect(() => {
-    // Listen for game state updates from the server
     socket.on('connect', () => {
       console.log('Connected to server');
     });
@@ -59,96 +55,12 @@ const StartScreen: React.FC = () => {
     }
   }, [navigate, isJoining])
 
-  const onPlayerDataChange = (property: string, value: string, playerIndex: number) => {
-    const updatedPlayerDetails = playerDetails.map((player, index) => {
-      if (index === playerIndex) return { ...player, [property]: value }
-      else return player
-    })
-
-    setPlayerDetails(updatedPlayerDetails)
-  }
-
-  const onPlayerCountInputChange = (count: number) => {
-    setPlayerCount(count)
-    onContinueButtonClick()
-  }
-
-  const onContinueButtonClick = () => {
-    if (playerCount >= 2) {
-      setCountValidated(true)
-      setPlayerDetails(getInitialPlayersData())
+  const handleJoinGame = () => {
+    if (playerName.trim()) {
+      setIsJoining(true)
+      socket.emit('joinGame', { name: playerName, color: playerColor })
     } else {
-      showToast('Enter Player Count Greater Than 2')
-    }
-  }
-
-  const getInitialPlayersData = (): Player[] => {
-    const data: Player[] = []
-    for (let i = 0; i < playerCount; i += 1) {
-      data.push({ name: '', color: COLORS[i] })
-    }
-    return data
-  }
-
-  const getPlayerFormFields = () => {
-    const fields = []
-    for (let i = 0; i < playerCount; i += 1) {
-      fields.push(
-        <div className="field-group" key={i}>
-          <input
-            className="input"
-            placeholder="Enter Player Name"
-            onChange={(event) => onPlayerDataChange('name', event.target.value, i)}
-            value={playerDetails[i]?.name || ''}
-          />
-          <select
-            className="input mar-2"
-            onChange={(event) => onPlayerDataChange('color', event.target.value, i)}
-            value={playerDetails[i] ? playerDetails[i].color : COLORS[i]}
-          >
-            {COLORS.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
-        </div>
-      )
-    }
-    return fields
-  }
-
-  const getNumberOfPlayersInputBoxes = () => {
-    const inputBoxes = []
-    for (let i = GAME_SETTINGS.MIN_PLAYERS; i <= GAME_SETTINGS.MAX_PLAYERS; i++) {
-      inputBoxes.push(
-        <div
-          key={i}
-          className={`player-count-box ${i === playerCount ? 'active' : ''}`}
-          onClick={() => onPlayerCountInputChange(i)}
-        >
-          {i}
-        </div>
-      )
-    }
-    return inputBoxes
-  }
-
-  const validateGameSettings = async () => {
-    if (!address) {
-      return alert('Please connect your wallet first')
-    }
-    if (playerDetails) {
-      if (playerDetails.every((player) => player.name && player.color)) {
-        setIsJoining(true)
-        // Join the game
-        socket.emit('joinGame', { name: playerDetails[0].name, color: playerDetails[0].color })
-        // Navigation to game screen will happen in useEffect when gameState updates
-      } else {
-        showToast('Please Enter All Player Details')
-      }
-    } else {
-      showToast('Please Enter Player Details')
+      showToast('Please enter your name')
     }
   }
 
@@ -158,47 +70,38 @@ const StartScreen: React.FC = () => {
         <img src={logo} alt="Game Logo" />
       </div>
       <div className="game-form">
-        {gameState && gameState.players.length > 0 ? (
-          <div>
-            <h2>Current Players:</h2>
+        <h2>Join Monopoly Game</h2>
+        <input
+          type="text"
+          placeholder="Enter your name"
+          value={playerName}
+          onChange={(e) => setPlayerName(e.target.value)}
+          className="input"
+        />
+        <select
+          value={playerColor}
+          onChange={(e) => setPlayerColor(e.target.value)}
+          className="input mar-2"
+        >
+          {COLORS.map((color) => (
+            <option key={color} value={color}>
+              {color}
+            </option>
+          ))}
+        </select>
+        <button onClick={handleJoinGame} disabled={isJoining} className="input active">
+          {isJoining ? 'Joining...' : 'Join Game'}
+        </button>
+        
+        {gameState && gameState.players.length > 0 && (
+          <div className="current-players">
+            <h3>Current Players:</h3>
             <ul>
               {gameState.players.map((player, index) => (
-                <li key={index}>{player.name} - {player.color}</li>
+                <li key={index} style={{color: player.color}}>{player.name}</li>
               ))}
             </ul>
-            <button onClick={validateGameSettings} disabled={isJoining}>
-              {isJoining ? 'Joining...' : 'Join Game'}
-            </button>
           </div>
-        ) : countValidated ? (
-          <>
-            <label htmlFor="PlayerCount">Enter Player Details</label>
-            <div className="player-details-form">
-              {getPlayerFormFields()}
-              <div className="player-details-form-actions">
-                <button
-                  type="button"
-                  className="input danger"
-                  onClick={() => setCountValidated(false)}
-                >
-                  Cancel
-                </button>
-
-                <button type="button" className="input active" onClick={validateGameSettings}>
-                  Start Game
-                </button>
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="player-count-form">
-              <label htmlFor="PlayerCount" className="player-count-label">
-                Select Number of Players
-              </label>
-              <div className="input-wrapper">{getNumberOfPlayersInputBoxes()}</div>
-            </div>
-          </>
         )}
       </div>
     </div>

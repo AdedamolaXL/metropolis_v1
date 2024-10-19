@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import data from "../../data/gameBlocks.json";
-import { SQUARE_TYPES } from "../../Constants";
+import { SQUARE_TYPES } from "../../../backend/shared/Constants";
 import { GameBox } from "../../components";
-import { BOX_TYPES } from "../../Constants";
+import { BOX_TYPES } from "../../../backend/shared/Constants";
 import die1 from "../../assets/Die_1.png";
 import die2 from "../../assets/Die_2.png";
 import die3 from "../../assets/Die_3.png";

@@ -3,7 +3,7 @@ import chanceIcon from "../../../assets/question.png";
 import communityIcon from "../../../assets/chest.png";
 import railRoadIcon from "../../../assets/rail.png";
 import taxIcon from "../../../assets/tax.png";
-import { BOX_TYPES } from "../../../Constants";
+import { BOX_TYPES } from "../../../../backend/shared/Constants";
 import "./boxTypes.scss";
 
 export const SpecialBox = ({
