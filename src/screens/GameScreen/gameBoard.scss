@@ -1,0 +1,234 @@
+/* General Styles */
+div {
+  box-sizing: border-box;
+  text-transform: uppercase;
+  font-family: 'Arial', sans-serif;
+  color: black; /* Set all fonts to black */
+}
+
+.responsive {
+  background: #ffffff; /* Light arcade-like background */
+  width: 80vw;
+  height: 80vw;
+  margin: 20px auto;
+  border: 5px solid #ffffff; /* Bold, colorful border */
+  border-radius: 15px; /* Rounded edges */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Arcade-style shadow */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.mainSquare {
+  height: 100%;
+  outline-offset: -10px;
+}
+
+.row {
+  width: 100%;
+  display: flex;
+}
+
+.top, .bottom {
+  height: 15%;
+}
+
+.center {
+  height: 70%;
+  display: flex;
+}
+
+.vertical-square {
+  flex-grow: 0.89;
+  border: 3px solid #000;
+  background-color: #fff; /* White background for clean arcade style */
+  position: relative;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Slight shadow effect */
+  transition: transform 0.3s ease;
+}
+.side-square {
+  flex-grow: 1.5;
+  border: 3px solid #000;
+  background-color: #fff; /* White background for clean arcade style */
+  position: relative;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Slight shadow effect */
+  transition: transform 0.3s ease;
+}
+.vertical-square:hover, .side-square:hover {
+  transform: scale(1.05); /* Arcade pop effect */
+}
+
+.corner-square {
+  flex-grow: 1.5;
+  border: 3px solid #ffffff;
+  background-color: #ffcccb; /* Light arcade red */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+.center-square {
+  flex-grow: 11.5;
+  // border: 3px solid #000;
+  background-color: #add8e6; /* Light arcade blue */
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.squareCorner {
+  height: 5%;
+  width: 65%;
+  border: 2px solid #ca2020;
+  position: absolute;
+  top: 5%;
+  right: 5%;
+}
+
+.firstLine {
+  position: absolute;
+  font-size: 1.2vw;
+  font-weight: 700;
+  text-align: center;
+  color: black; /* Set text to black */
+}
+
+.firstLine-bottom {
+  top: 30%;
+  left: 5px;
+  right: 5px;
+}
+
+.dices {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.roll-dice-1, .show-logs {
+  padding: 12px;
+  width: 15vw;
+  margin: 10px 5px;
+  background-color: #ff9800; /* Vibrant arcade orange */
+  color: rgb(255, 255, 255); /* Font set to black */
+  border: 3px solid #000;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.roll-dice-1:hover, .show-logs:hover {
+  background-color: #ff5722; /* Darker arcade orange */
+  transform: scale(1.05); /* Arcade hover effect */
+}
+
+.game-over {
+  position: absolute;
+  left: 21vw;
+  top: 1vw;
+  font-size: 2vw;
+  color: red;
+  font-weight: bold;
+}
+
+.center-square-container {
+  position: absolute;
+  width: 50vw;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 2rem;
+}
+
+.player-turn {
+  position: absolute;
+  left: calc(100%);
+  padding: 10px;
+  background-color: #878577; /* Bright arcade yellow */
+  color: black; /* Set font color to black */
+  font-weight: bold;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.balance-wrap {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.player-balance {
+  font-size: 1vw;
+  width: 10vw;
+  background-color: #c8e6c9; /* Light green arcade color */
+  padding: 10px;
+  margin: 4px 0;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  color: black; /* Font set to black */
+}
+
+.player-balance-item {
+  padding: 4px;
+  margin: 5px 0;
+  border-bottom: 1px solid #388e3c;
+}
+
+.dice-1 {
+  margin-right: 10px;
+}
+
+.logs {
+  min-height: 20vw;
+  max-height: 45vw;
+  padding: 20px;
+  background-color: white;
+  overflow-y: auto;
+  position: absolute;
+  top: 5vh;
+  left: 0;
+  right: 10px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Bold arcade shadow */
+  border-radius: 10px;
+  animation: topToBottom 300ms both ease;
+}
+
+.close-logs-btn {
+  background-color: transparent;
+  font-size: 30px;
+  border: none;
+  outline: none;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  color: black;
+}
+
+.close-logs-btn:focus, .close-logs-btn:active {
+  outline: none;
+  background-color: transparent;
+}
+
+/* Keyframes for Logs Animation */
+@keyframes topToBottom {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Hover and Active States for Buttons */
+.roll-dice-1:hover, .show-logs:hover {
+  background-color: #ff5722;
+  color: black; /* Ensures font remains black */
+  transition: 0.3s ease;
+}
