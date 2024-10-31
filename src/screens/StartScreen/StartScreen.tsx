@@ -1,21 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import logo from '../../assets/logo.png'
-import { COLORS } from '../../../backend/shared/Constants'
-import { showToast } from '../../utilities'
-import './startScreen.scss'
-import io from 'socket.io-client'
-
-interface Player {
-  name: string
-  color: string
-}
-
-interface GameState {
-  players: Player[]
-  properties: any[] // Define a proper type for properties if possible
-  currentPlayer: Player | null
-}
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/logo.png';
+import { COLORS } from '../../../backend/shared/constants';
+import { showToast } from '../../utilities';
+import { GameState, ServerPlayerData } from '../../../backend/shared/types'; // Use ServerPlayerData
+import './startScreen.scss';
+import io from 'socket.io-client';
 
 const socket = io('http://localhost:4000', {
   withCredentials: true,
@@ -25,11 +15,11 @@ const socket = io('http://localhost:4000', {
 });
 
 const StartScreen: React.FC = () => {
-  const navigate = useNavigate()
-  const [playerName, setPlayerName] = useState('')
-  const [playerColor, setPlayerColor] = useState(COLORS[0])
-  const [gameState, setGameState] = useState<GameState | null>(null)
-  const [isJoining, setIsJoining] = useState(false)
+  const navigate = useNavigate();
+  const [playerName, setPlayerName] = useState('');
+  const [playerColor, setPlayerColor] = useState(COLORS[0] || 'blue'); // Fallback color
+  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [isJoining, setIsJoining] = useState(false);
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -41,28 +31,34 @@ const StartScreen: React.FC = () => {
       showToast('Failed to connect to the game server. Please try again later.');
     });
 
+    socket.on('disconnect', () => {
+      console.warn('Disconnected from server');
+      showToast('Disconnected from the server. Please reconnect.');
+    });
+
     socket.on('gameState', (state: GameState) => {
-      setGameState(state)
+      setGameState(state);
       if (state.players.length > 0 && isJoining) {
-        navigate('/game') // Navigate to game screen when players are present and we're joining
+        navigate('/game'); // Navigate to the game screen
       }
-    })
+    });
 
     return () => {
       socket.off('connect');
       socket.off('connect_error');
+      socket.off('disconnect');
       socket.off('gameState');
-    }
-  }, [navigate, isJoining])
+    };
+  }, [navigate, isJoining]);
 
   const handleJoinGame = () => {
     if (playerName.trim()) {
-      setIsJoining(true)
-      socket.emit('joinGame', { name: playerName, color: playerColor })
+      setIsJoining(true);
+      socket.emit('joinGame', { name: playerName, color: playerColor });
     } else {
-      showToast('Please enter your name')
+      showToast('Please enter your name');
     }
-  }
+  };
 
   return (
     <div className="start-screen">
@@ -97,15 +93,15 @@ const StartScreen: React.FC = () => {
           <div className="current-players">
             <h3>Current Players:</h3>
             <ul>
-              {gameState.players.map((player, index) => (
-                <li key={index} style={{color: player.color}}>{player.name}</li>
+              {gameState.players.map((player: ServerPlayerData, index: number) => (
+                <li key={index} style={{ color: player.color }}>{player.name}</li>
               ))}
             </ul>
           </div>
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default StartScreen
+export default StartScreen;

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export { showToast } from "./ToastUtil";
-export { Cycled } from "./Cycled";
+export { Cycled } from "../../backend/utilities/cycled";
 
 export function curry(inputFunction:any) {
   return function curried(this: any, ...args:any) {

@@ -1,0 +1,17 @@
+[
+  { "id":"CM1", "text":  "Get out of Jail, Free. This card may be kept until needed or sold."},
+  { "id":"CM2", "text":  "You have won second prize in a beauty contest. Collect $10."},
+  { "id":"CM3", "text":  "From sale of stock, you get $50."},
+  { "id":"CM4", "text":  "Your insurance policy has increased. Pay $50."},
+  { "id":"CM5", "text":  "Income tax refund. Collect $20."},
+  { "id":"CM6", "text":  "Annual Income. Receive $100."},
+  { "id":"CM7", "text":  "You inherit $100."},
+  { "id":"CM8", "text":  "Receive your interest on loan to 7%. Receive $25."},
+  { "id":"CM9", "text":  "Pay a fine of $10 or draw a chance card."},
+  { "id":"CM10", "text": "Bank error in your favor. Collect $200."},
+  { "id":"CM11", "text": "Go back to Belleville"},
+  { "id":"CM12", "text": "Doctor's fee. Pay $100."},
+  { "id":"CM13", "text": "It is your birthday. Collect $10 from every player."},
+  { "id":"CM14", "text": "Advance to 'GO' (Collect $200)"},
+  { "id":"CM15", "text": "Go to Jail. Do not pass go. Do not collect $200."}
+]

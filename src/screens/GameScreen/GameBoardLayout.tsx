@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import data from "../../data/gameBlocks.json";
-import { SQUARE_TYPES } from "../../../backend/shared/Constants";
+import data from "../../../backend/shared/data/gameBlocks.json";
+import { SquareType } from "../../../backend/shared/constants";
 import { GameBox } from "../../components";
-import { BOX_TYPES } from "../../../backend/shared/Constants";
+import { BOX_TYPES } from "../../../backend/shared/constants";
 import die1 from "../../assets/Die_1.png";
 import die2 from "../../assets/Die_2.png";
 import die3 from "../../assets/Die_3.png";
@@ -10,18 +10,76 @@ import die4 from "../../assets/Die_4.png";
 import die5 from "../../assets/Die_5.png";
 import die6 from "../../assets/Die_6.png";
 import { monopolyInstance } from "../../models/Monopoly";
+import { GameBoardSpace, BoxType, ClientPlayerData } from '../../../backend/shared/types';
+import { showToast } from "../../utilities";
 
-export const GameBoardLayout = (props: {
-  players?: any;
-  onDiceRoll?: any;
-  diceValues?: any;
-  toggleLogs?: any;
-  showLogs?: any;
-  gameStatus?: any;
-  currentPlayer?: any;
-  toggleCurrentTurn?: any;
-  removePlayerFromGame?: any;
-}) => {
+// Interface for the raw data from gameBlocks.json
+interface RawBoxElement {
+  name: string;
+  pricetext?: string;
+  price?: string | number;
+  color?: string;
+  groupNumber?: string | number;
+  baserent?: string | number;
+  rent1?: string | number;
+  rent2?: string | number;
+  rent3?: string | number;
+  rent4?: string | number;
+  rent5?: string | number;
+  imageName?: string;
+}
+
+// processed box element for gameBlocks
+interface BoxElement {
+  name: string;
+  pricetext?: string;
+  price?: number;
+  color?: string;
+  groupNumber?: number;
+  baserent?: number;
+  rent1?: number;
+  rent2?: number;
+  rent3?: number;
+  rent4?: number;
+  rent5?: number;
+  imageName?: string;
+}
+
+interface GameBoardLayoutProps {
+  players: ClientPlayerData[];
+  onDiceRoll: () => void;
+  diceValues: { one: number; two: number };
+  toggleLogs: () => void;
+  showLogs: boolean;
+  gameStatus: boolean;
+  currentPlayer: ClientPlayerData;
+  toggleCurrentTurn: () => void;
+  removePlayerFromGame: (id: string) => void;
+}
+
+
+const convertToNumber = (value: string | number | undefined): number | undefined => {
+  if (typeof value === 'undefined') return undefined;
+  if (typeof value === 'number') return value;
+  const parsed = parseInt(value, 10);
+  return isNaN(parsed) ? undefined : parsed;
+};
+
+const processBoxElement = (element: RawBoxElement): BoxElement => {
+  return {
+    ...element,
+    price: convertToNumber(element.price),
+    groupNumber: convertToNumber(element.groupNumber),
+    baserent: convertToNumber(element.baserent),
+    rent1: convertToNumber(element.rent1),
+    rent2: convertToNumber(element.rent2),
+    rent3: convertToNumber(element.rent3),
+    rent4: convertToNumber(element.rent4),
+    rent5: convertToNumber(element.rent5),
+  };
+};
+
+export const GameBoardLayout: React.FC<GameBoardLayoutProps> = (props) => {
   const {
     onDiceRoll,
     diceValues,
@@ -29,94 +87,95 @@ export const GameBoardLayout = (props: {
     showLogs,
     gameStatus,
     currentPlayer,
+    players,
+    toggleCurrentTurn,
+    removePlayerFromGame
   } = props;
 
-  const getGameBottomSide = () => data.slice(0, 11).reverse();
+  const handleRemovePlayer = (id: string) => {
+    // Call removePlayerFromGame prop function to update player state
+    removePlayerFromGame(id);
 
-  const getGameLeftSide = () => [...data.slice(11, 20).reverse()];
-
-  const getGameRightSide = () => data.slice(31, 40);
-
-  const getGameTopSide = () => data.slice(20, 31).reverse();
-
-  const getBoxType = (
-    boxElement:
-      | {
-          name: string;
-          pricetext: string;
-          color: string;
-          price: string;
-          groupNumber: string;
-          baserent: string;
-          rent1: string;
-          rent2: string;
-          rent3: string;
-          rent4: string;
-          rent5: string;
-        }
-      | {
-          name: string;
-          pricetext: string;
-          color: string;
-          price: number;
-          groupNumber: number;
-          baserent: number;
-          rent1: number;
-          rent2: number;
-          rent3: number;
-          rent4: number;
-          rent5: number;
-        }
-      | {
-          name: string;
-          pricetext: string;
-          color: string;
-          price: number;
-          groupNumber: number;
-          baserent: string;
-          rent1: string;
-          rent2: string;
-          rent3: string;
-          rent4: string;
-          rent5: string;
-        }
-  ) => {
-    const { name, pricetext, baserent, price } = boxElement;
-    const nameInLowerCase = name.toLowerCase();
-    if (nameInLowerCase === "go") {
-      return { type: BOX_TYPES.GO, price: 200 };
-    } else if (nameInLowerCase.includes("tax"))
-      return {
-        type: BOX_TYPES.TAX,
-        price: parseInt(pricetext.replace(/^\D+/g, "")),
-      };
-    else if (nameInLowerCase === "just visiting")
-      return { type: BOX_TYPES.JAIL, price: null };
-    else if (nameInLowerCase === "free parking")
-      return { type: BOX_TYPES.PARKING, price: null };
-    else if (nameInLowerCase === "chance")
-      return { type: BOX_TYPES.CHANCE, price: null };
-    else if (nameInLowerCase === "community chest")
-      return { type: BOX_TYPES.COMMUNITY, price: null };
-    else if (nameInLowerCase === "go to jail")
-      return { type: BOX_TYPES.GO_TO_JAIL, price: null };
-    else if (
-      nameInLowerCase.includes("railroad") ||
-      nameInLowerCase.includes("short line")
-    )
-      return { type: BOX_TYPES.RAILROADS, price };
-    else if (typeof baserent === "string" && typeof price === "number")
-      return {
-        type: BOX_TYPES.UTILITIES,
-        price,
-      };
-    else if (typeof baserent === "number")
-      return {
-        type: BOX_TYPES.AVENUE,
-        price,
-      };
+     // Find the player object from the players array using the ID
+  const playerToRemove = players.find(player => player.id === id);
+  if (playerToRemove) {
+    monopolyInstance.removePlayer(id);  // Assuming monopolyInstance has removePlayer functionality
+    showToast(`${playerToRemove.name} has been removed from the game`, 3000);
+  }
   };
 
+  const getGameBottomSide = () => (data as RawBoxElement[]).slice(0, 11).reverse();
+
+  const getGameLeftSide = () => [...(data as RawBoxElement[]).slice(11, 20).reverse()];
+
+  const getGameRightSide = () => (data as RawBoxElement[]).slice(31, 40);
+
+  const getGameTopSide = () => (data as RawBoxElement[]).slice(20, 31).reverse();
+
+  
+  
+  const getBoxType = (rawElement: RawBoxElement): GameBoardSpace => {
+    const boxElement = processBoxElement(rawElement);
+    const { 
+      name, 
+      pricetext, 
+      price = 0, 
+      color = "#ffffff", 
+      groupNumber = 0,
+      baserent,
+      rent1,
+      rent2,
+      rent3,
+      rent4,
+      rent5,
+      imageName
+    } = boxElement;
+    
+    const nameInLowerCase = name.toLowerCase();
+    
+    const baseSpace: GameBoardSpace = {
+      name,
+      color,
+      groupNumber,
+      type: BOX_TYPES.AVENUE as BoxType,
+      pricetext,
+      price,
+      baserent,
+      rent1,
+      rent2,
+      rent3,
+      rent4,
+      rent5,
+      imageName
+    };
+    
+    if (nameInLowerCase === "go") {
+      return { ...baseSpace, type: BOX_TYPES.GO as BoxType, price: 200 };
+    } else if (nameInLowerCase.includes("tax")) {
+      return { ...baseSpace, type: BOX_TYPES.TAX as BoxType, price: parseInt(pricetext?.replace(/^\D+/g, "") || "0") };
+    } else if (nameInLowerCase === "just visiting") {
+      return { ...baseSpace, type: BOX_TYPES.JAIL as BoxType };
+    } else if (nameInLowerCase === "free parking") {
+      return { ...baseSpace, type: BOX_TYPES.PARKING as BoxType };
+    } else if (nameInLowerCase === "chance") {
+      return { ...baseSpace, type: BOX_TYPES.CHANCE as BoxType };
+    } else if (nameInLowerCase === "community chest") {
+      return { ...baseSpace, type: BOX_TYPES.COMMUNITY as BoxType };
+    } else if (nameInLowerCase === "go to jail") {
+      return { ...baseSpace, type: BOX_TYPES.JAIL as BoxType };
+    } else if (nameInLowerCase.includes("railroad")) {
+      return { ...baseSpace, type: BOX_TYPES.RAILROADS as BoxType };
+    } else if (typeof price === "number") {
+      return { ...baseSpace, type: BOX_TYPES.AVENUE as BoxType };
+    }
+
+    // Fallback case to ensure we always return a valid GameBoardSpace
+    return {
+      ...baseSpace,
+      // type: BOX_TYPES.AVENUE as BoxType
+    }
+  };
+  
   const getDiceImage = (diceValue: number) => {
     if (diceValue === 1) return die1;
     if (diceValue === 2) return die2;
@@ -128,98 +187,84 @@ export const GameBoardLayout = (props: {
 
   return (
     <div className="mainSquare">
-      <div className="row top">
-        {getGameTopSide().map((element, index) => {
-          if (index === 0 || index === 10) {
-            return (
-              <GameBox
-                type={SQUARE_TYPES.CORNER_SQUARE}
-                id={20 + index + 1}
-                key={index}
-                boxType={getBoxType(element)}
-                {...element}
-                {...props}
-              />
-            );
-          }
-          return (
-            <GameBox
-              type={SQUARE_TYPES.VERTICAL_SQUARE}
-              id={20 + index + 1}
-              key={index}
-              boxType={getBoxType(element)}
-              {...element}
-              {...props}
-            />
-          );
-        })}
+         {/* Top row */}
+         <div className="row top">
+        {getGameTopSide().map((element, index) => (
+          <GameBox
+            type={index === 0 || index === 10 ? SquareType.CORNER : SquareType.VERTICAL}
+            id={20 + index + 1}
+            key={index}
+            boxType={getBoxType(element)}
+            players={players}
+            currentPlayer={currentPlayer}
+            toggleCurrentTurn={toggleCurrentTurn}
+            baserent={convertToNumber(element.baserent) || 0}
+            name={element.name}
+            rent1={convertToNumber(element.rent1)}
+            rent2={convertToNumber(element.rent2)}
+            rent3={convertToNumber(element.rent3)}
+            rent4={convertToNumber(element.rent4)}
+            rent5={convertToNumber(element.rent5)}
+          />
+        ))}
       </div>
-      <div className="row center">
-        <div className="corner-square">
-          {getGameLeftSide().map((element, index) => {
-            return (
-              <GameBox
-                type={SQUARE_TYPES.SIDE_SQUARE}
-                id={11 + (9 - index)}
-                key={index}
-                boxType={getBoxType(element)}
-                {...element}
-                {...props}
-              />
-            );
-          })}
-        </div>
+
+
+       <div className="row center">
+      <div className="corner-square">
+        {getGameLeftSide().map((element, index) => (
+          <GameBox
+            type={index === 0 || index === 10 ? SquareType.CORNER : SquareType.VERTICAL}
+            id={20 + index + 1}
+            key={index}
+            boxType={getBoxType(element)}
+            players={players}
+            currentPlayer={currentPlayer}
+            toggleCurrentTurn={toggleCurrentTurn}
+            baserent={convertToNumber(element.baserent) || 0}
+            name={element.name}
+            rent1={convertToNumber(element.rent1)}
+            rent2={convertToNumber(element.rent2)}
+            rent3={convertToNumber(element.rent3)}
+            rent4={convertToNumber(element.rent4)}
+            rent5={convertToNumber(element.rent5)}
+          />
+        ))}
+      </div>
+
+      
         <div className="center-square">
           <div className="center-square-container">
-            <div className="balance-wrap">
-              <div className="player-balance">
-                <b> Balances</b>
-              </div>
+          <div className="balance-wrap">
+  <div className="player-balance"><b>Balances</b></div>
+  <button onClick={() => handleRemovePlayer(currentPlayer.id)}>Remove Current Player</button>
+  {[...props.players].map(({ balance, color, name }, index) => (
+    <div className="player-balance" key={index}>
+      <div style={{ border: `2px solid ${color}` }} className="player-balance-item">
+        <span>
+          {name}: ${balance}
+          {index === 0 ? <span style={{ color: "red" }}>*</span> : ""}
+        </span>
+      </div>
+    </div>
+  ))}
+</div>
 
-              {[...props.players].map(({ balance, color, name }, index) => (
-                <div className="player-balance">
-                  <div
-                    style={{ border: `2px solid ${color}` }}
-                    className="player-balance-item"
-                  >
-                    <span>
-                      {name} ${balance}
-                      {!index ? <span style={{ color: "red" }}>*</span> : ""}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
 
-            <div className="dices">
-              {getDiceImage(diceValues.one) && (
-                <img
-                  src={getDiceImage(diceValues.one)}
-                  alt="Dice 1"
-                  className="dice-1"
-                />
-              )}
-              {getDiceImage(diceValues.two) && (
-                <img
-                  src={getDiceImage(diceValues.two)}
-                  alt="Dice 2"
-                  className="dice-2"
-                />
-              )}
-            </div>
+<div className="dices">
+          {getDiceImage(diceValues.one) && <img src={getDiceImage(diceValues.one)} alt="Dice 1" />}
+          {getDiceImage(diceValues.two) && <img src={getDiceImage(diceValues.two)} alt="Dice 2" />}
+        </div>
 
-            {showLogs && (
-              <div className="logs">
-                <ul>
-                  <button className="close-logs-btn" onClick={toggleLogs}>
-                    ✗
-                  </button>
-                  {monopolyInstance.logs.map((log) => (
-                    <li>{log}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+
+           {showLogs && (
+          <div className="logs">
+            <button onClick={toggleLogs}>✗</button>
+            <ul>{monopolyInstance.logs.map((log, i) => <li key={i}>{log}</li>)}</ul>
+          </div>
+        )}
+
+
             <div style={{ marginTop: "3rem" }}>
               {gameStatus ? (
                 <button
@@ -241,37 +286,52 @@ export const GameBoardLayout = (props: {
             </div>
           </div>
         </div>
-        <div className="corner-square">
-          {getGameRightSide().map((element, index) => {
-            return (
-              <GameBox
-                type={SQUARE_TYPES.SIDE_SQUARE}
-                id={31 + index + 1}
-                key={index}
-                boxType={getBoxType(element)}
-                {...element}
-                {...props}
-              />
-            );
-          })}
-        </div>
-      </div>
-      <div className="row top">
-        {getGameBottomSide().map((element, index) => (
+
+
+          <div className="corner-square">
+        {getGameRightSide().map((element, index) => (
           <GameBox
-            type={
-              index === 0 || index === 10
-                ? SQUARE_TYPES.CORNER_SQUARE
-                : SQUARE_TYPES.VERTICAL_SQUARE
-            }
-            id={11 - index}
+            type={index === 0 || index === 10 ? SquareType.CORNER : SquareType.VERTICAL}
+            id={20 + index + 1}
             key={index}
             boxType={getBoxType(element)}
-            {...element}
-            {...props}
+            players={players}
+            currentPlayer={currentPlayer}
+            toggleCurrentTurn={toggleCurrentTurn}
+            baserent={convertToNumber(element.baserent) || 0}
+            name={element.name}
+            rent1={convertToNumber(element.rent1)}
+            rent2={convertToNumber(element.rent2)}
+            rent3={convertToNumber(element.rent3)}
+            rent4={convertToNumber(element.rent4)}
+            rent5={convertToNumber(element.rent5)}
           />
         ))}
       </div>
     </div>
+
+
+      {/* Bottom row */}
+    <div className="row bottom">
+      {getGameBottomSide().map((element, index) => (
+        <GameBox
+        type={index === 0 || index === 10 ? SquareType.CORNER : SquareType.VERTICAL}
+        id={20 + index + 1}
+        key={index}
+        boxType={getBoxType(element)}
+        players={players}
+        currentPlayer={currentPlayer}
+        toggleCurrentTurn={toggleCurrentTurn}
+        baserent={convertToNumber(element.baserent) || 0}
+        name={element.name}
+        rent1={convertToNumber(element.rent1)}
+        rent2={convertToNumber(element.rent2)}
+        rent3={convertToNumber(element.rent3)}
+        rent4={convertToNumber(element.rent4)}
+        rent5={convertToNumber(element.rent5)}
+      />
+      ))}
+    </div>
+  </div>
   );
 };
