@@ -1,7 +1,13 @@
+export enum Tile {
+  PROPERTY = 'property-tile',
+  CORNER = 'corner-tile',
+  SPECIAL = 'special-tile',
+}
+
 export enum SquareType {
-  VERTICAL = 'vertical-square',
-  CORNER = 'corner-square',
-  SIDE = 'side-square'
+  VERTICAL_SQUARE = 'vertical-square',
+  CORNER_SQUARE = 'corner-square',
+  HORIZONTAL_SQUARE = 'horizontal-square',
 }
 
 // colors are placeholder tokens for player avatars
@@ -9,15 +15,17 @@ export const COLORS = ['red', 'yellow', 'green', 'purple', 'blue', 'pink', 'cyan
 
 export const BOX_TYPES = {
   GO: 'GO',
-  AVENUE: 'AVENUE',
   CHANCE: 'CHANCE',
   COMMUNITY: 'COMMUNITY',
-  TAX: 'TAX',
-  UTILITIES: 'UTILITIES',
+  INCOME: 'INCOME',
+  LUXURY: 'LUXURY',
+  ELECTRIC: 'ELECTRIC',
+  WATER: 'WATER',
   JAIL: 'JAIL',
   PARKING: 'PARKING',
-  // GO_TO_JAIL: 'GO TO JAIL',
   RAILROADS: 'RAILROADS',
+  AVENUE: 'AVENUE',
+  VISITING: 'VISITING'
 }
 
 export const GAME_SETTINGS = {

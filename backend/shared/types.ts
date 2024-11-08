@@ -3,6 +3,7 @@ import { GameEvents } from "./constants";
 
 export interface BasePlayer {
   id: string;
+  walletAddress: string;
   name: string;
   wealth: number;
   color: string;
@@ -13,6 +14,7 @@ export interface ServerPlayerData extends BasePlayer {
   ownedProperties: Property[];
   isInJail?: boolean;
   getOutOfJailFree: number;
+  lastDiceValue: number;
 }
 
 export interface ClientPlayerData extends BasePlayer {
@@ -41,7 +43,7 @@ export interface Property {
 export interface GameState {
   players: ClientPlayerData[];
   properties: Property[];
-  currentPlayer: ServerPlayerData | null;
+  currentPlayer: ClientPlayerData | null;
 }
 
 export type BoxType = keyof typeof BOX_TYPES;
@@ -60,6 +62,8 @@ export interface GameBoardSpace {
   rent4?: number;
   rent5?: number;
   imageName?: string;
+  index: number;
+  currentPlayer?: ServerPlayerData | null;
 }
 
 export interface DiceRoll {

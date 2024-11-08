@@ -5,14 +5,9 @@ import { COLORS } from '../../../backend/shared/constants';
 import { showToast } from '../../utilities';
 import { GameState, ServerPlayerData } from '../../../backend/shared/types'; // Use ServerPlayerData
 import './startScreen.scss';
-import io from 'socket.io-client';
+import { useAccount } from 'wagmi';
+import { monopolyInstance } from '../../models/Monopoly';
 
-const socket = io('http://localhost:4000', {
-  withCredentials: true,
-  extraHeaders: {
-    "my-custom-header": "abcd"
-  }
-});
 
 const StartScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -20,45 +15,39 @@ const StartScreen: React.FC = () => {
   const [playerColor, setPlayerColor] = useState(COLORS[0] || 'blue'); // Fallback color
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isJoining, setIsJoining] = useState(false);
+  const { address, isConnected} = useAccount();
 
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Connected to server');
-    });
-
-    socket.on('connect_error', (error) => {
-      console.error('Connection error:', error);
-      showToast('Failed to connect to the game server. Please try again later.');
-    });
-
-    socket.on('disconnect', () => {
-      console.warn('Disconnected from server');
-      showToast('Disconnected from the server. Please reconnect.');
-    });
-
-    socket.on('gameState', (state: GameState) => {
-      setGameState(state);
-      if (state.players.length > 0 && isJoining) {
-        navigate('/game'); // Navigate to the game screen
+    monopolyInstance.socket.on('gameState', (state) => {
+      if (state.players.length > 0) {
+        navigate('/game');
       }
+    });
+    monopolyInstance.socket.on('rejoinGame', (player) => {
+      setPlayerName(player.name);
+      setPlayerColor(player.color);
+      navigate('/game');
     });
 
     return () => {
-      socket.off('connect');
-      socket.off('connect_error');
-      socket.off('disconnect');
-      socket.off('gameState');
+      monopolyInstance.socket.off('gameState');
+      monopolyInstance.socket.off('rejoinGame');
     };
-  }, [navigate, isJoining]);
+  }, [navigate]);
 
   const handleJoinGame = () => {
-    if (playerName.trim()) {
-      setIsJoining(true);
-      socket.emit('joinGame', { name: playerName, color: playerColor });
+    if (!isConnected) {
+      showToast('Please connect your wallet first.');
+      return;
+    }
+
+    if (playerName.trim() && address) {
+      monopolyInstance.joinGame(playerName, playerColor, address);
     } else {
       showToast('Please enter your name');
     }
   };
+
 
   return (
     <div className="start-screen">
