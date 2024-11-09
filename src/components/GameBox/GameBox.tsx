@@ -6,6 +6,10 @@ import { monopolyInstance } from '../../models/Monopoly'
 import { ActionPopup } from './ActionPopup'
 import { GoBox, AvenueBox, SpecialBox } from './BoxTypes'
 import './gameBox.scss'
+import { simulateContract, writeContract } from '@wagmi/core'
+import { abi } from './abi'
+import { config } from './config'
+import { PROPERTY_CONTRACT_ABI } from '../../contracts-abi'; // Import the ABI
 
 export const GameBox = (props:any) => {
   const {
@@ -78,7 +82,7 @@ export const GameBox = (props:any) => {
     toggleCurrentTurn()
   }
 
-  const buyProperty = () => {
+  const buyProperty = async () => {
     currentPlayer.ownedProperties.push({
       name,
       rentLevel: 0,
@@ -92,6 +96,21 @@ export const GameBox = (props:any) => {
     transactionLog(message)
     setPlayerAction(null)
     toggleCurrentTurn()
+
+    try {
+      const { request } = await simulateContract(config,{
+        address: '0x...', // Address of the Property contract
+        abi: PROPERTY_CONTRACT_ABI,
+        functionName: 'purchase',
+        args: [currentPlayer.address], 
+      });
+
+      const result = await await writeContract(config, request); // Use the request from simulateContract
+
+      console.log('Property purchased:', result.hash); 
+    } catch (error) {
+      console.error('Error buying property:', error);
+    }
   }
 
   const handlePropertyTransaction = () => {
