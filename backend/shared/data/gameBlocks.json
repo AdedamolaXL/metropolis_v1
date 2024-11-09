@@ -1,21 +1,17 @@
 [
   {
     "name": "GO",
+    "type": "G0",
     "pricetext": "COLLECT $200 SALARY AS YOU PASS.",
     "color": "#FFFFFF",
-    "price": "",
-    "groupNumber": "",
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 0
   },
   {
-    "name": "Safe",
+    "name": "Boulevard of Belleville",
+    "type": "AVENUE",
     "pricetext": "$60",
-    "color": "#8B4513",
+    "color": "dark-purple",
     "price": 60,
     "groupNumber": 3,
     "baserent": 2,
@@ -24,25 +20,22 @@
     "rent3": 90,
     "rent4": 160,
     "rent5": 250,
-    "imageName": "Safe.jpeg"
+    "imageName": "",
+    "index": 1
   },
   {
     "name": "Community Chest",
-    "pricetext": "FOLLOW INSTRUCTIONS ON TOP CARD",
+    "type": "COMMUNITY",
+    "pricetext": "FOLLOW INSTRUCTIONS ON THE CARD",
     "color": "#FFFFFF",
-    "price": "",
-    "groupNumber": "",
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 2
   },
   {
-    "name": "Circle",
+    "name": "Street Lecourbe",
+    "type": "AVENUE",
     "pricetext": "$60",
-    "color": "#8B4513",
+    "color": "dark-purple",
     "price": 60,
     "groupNumber": 3,
     "baserent": 4,
@@ -51,38 +44,32 @@
     "rent3": 180,
     "rent4": 320,
     "rent5": 450,
-    "imageName": "Circle.png"
+    "imageName": "",
+    "index": 3
   },
   {
-    "name": "City Tax",
+    "name": "Income Tax",
+    "type": "INCOME",
     "pricetext": "Pay $200",
     "color": "#FFFFFF",
-    "price": "",
-    "groupNumber": "",
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 4
   },
   {
-    "name": "Hyperlane Railroad",
-    "pricetext": "$200",
+    "name": "Montparnasse Railroad",
+    "type": "RAILROAD",
+    "pricetext": "$25",
     "color": "#FFFFFF",
     "price": 200,
     "groupNumber": 1,
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 5
   },
   {
-    "name": "Hyperlane",
+    "name": "Street of Vaugirard",
+    "type": "AVENUE",
     "pricetext": "$100",
-    "color": "#87CEEB",
+    "color": "light-blue",
     "price": 100,
     "groupNumber": 4,
     "baserent": 6,
@@ -91,25 +78,22 @@
     "rent3": 270,
     "rent4": 400,
     "rent5": 550,
-    "imageName": "Hyperlane.png"
+    "imageName": "",
+    "index": 6
   },
   {
     "name": "Chance",
+    "type": "CHANCE",
     "pricetext": "FOLLOW INSTRUCTIONS ON TOP CARD",
     "color": "#FFFFFF",
-    "price": "",
-    "groupNumber": "",
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 7
   },
   {
-    "name": "Nethermind",
+    "name": "Street of Courcelles",
+    "type": "AVENUE",
     "pricetext": "$100",
-    "color": "#87CEEB",
+    "color": "light-blue",
     "price": 100,
     "groupNumber": 4,
     "baserent": 6,
@@ -118,12 +102,14 @@
     "rent3": 270,
     "rent4": 400,
     "rent5": 550,
-    "imageName": "Nethermind.png"
+    "imageName": "",
+    "index": 8
   },
   {
-    "name": "Zircuit",
+    "name": "Avenue of the Republic",
+    "type": "AVENUE",
     "pricetext": "$120",
-    "color": "#87CEEB",
+    "color": "light-blue",
     "price": 120,
     "groupNumber": 4,
     "baserent": 8,
@@ -132,25 +118,22 @@
     "rent3": 300,
     "rent4": 450,
     "rent5": 600,
-    "imageName": "Zircuit.png"
+    "imageName": "",
+    "index": 9
   },
   {
-    "name": "Just Visiting",
+    "name": "Just Visiting || Jail",
+    "type": "VISITING",
     "pricetext": "",
     "color": "#FFFFFF",
-    "price": "",
-    "groupNumber": "",
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 10
   },
   {
-    "name": "Chainlink",
+    "name": "Boulevard of the Villette",
+    "type": "AVENUE",
     "pricetext": "$140",
-    "color": "#FF0080",
+    "color": "purple",
     "price": 140,
     "groupNumber": 5,
     "baserent": 10,
@@ -159,25 +142,24 @@
     "rent3": 450,
     "rent4": 625,
     "rent5": 750,
-    "imageName": "Chainlink.png"
+    "imageName": "",
+    "index": 11
   },
   {
     "name": "Electric Company",
+    "type": "ELECTRIC",
     "pricetext": "$150",
     "color": "#FFFFFF",
     "price": 150,
     "groupNumber": 2,
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 12
   },
   {
-    "name": "Web3Auth",
+    "name": "Avenue of Neuilly",
+    "type": "AVENUE",
     "pricetext": "$140",
-    "color": "#FF0080",
+    "color": "purple",
     "price": 140,
     "groupNumber": 5,
     "baserent": 10,
@@ -186,12 +168,14 @@
     "rent3": 450,
     "rent4": 625,
     "rent5": 750,
-    "imageName": "Web3Auth.jpeg"
+    "imageName": "",
+    "index": 13
   },
   {
-    "name": "Avail",
+    "name": "Frue of Paradise",
+    "type":"AVENUE",
     "pricetext": "$160",
-    "color": "#FF0080",
+    "color": "purple",
     "price": 160,
     "groupNumber": 5,
     "baserent": 12,
@@ -200,25 +184,24 @@
     "rent3": 500,
     "rent4": 700,
     "rent5": 900,
-    "imageName": "Avail.png"
+    "imageName": "",
+    "index": 14
   },
   {
-    "name": "Avail Railroad",
-    "pricetext": "$200",
+    "name": "Lyon Railroad",
+    "type": "RAILROAD",
+    "pricetext": "$25",
     "color": "#FFFFFF",
     "price": 200,
     "groupNumber": 1,
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 15
   },
   {
-    "name": "RootStock",
+    "name": "Mozart Avenue",
+    "type": "AVENUE",
     "pricetext": "$180",
-    "color": "#FFA500",
+    "color": "orange",
     "price": 180,
     "groupNumber": 6,
     "baserent": 14,
@@ -227,25 +210,22 @@
     "rent3": 550,
     "rent4": 750,
     "rent5": 950,
-    "imageName": "Rootstock.jpeg"
+    "imageName": "",
+    "index": 16
   },
   {
     "name": "Community Chest",
+    "type": "COMMUNITY",
     "pricetext": "FOLLOW INSTRUCTIONS ON TOP CARD",
     "color": "#FFFFFF",
-    "price": "",
-    "groupNumber": "",
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 17
   },
   {
-    "name": "PancakeSwap",
+    "name": "Boulevard Saint-Michel",
+    "type": "AVENUE",
     "pricetext": "$180",
-    "color": "#FFA500",
+    "color": "orange",
     "price": 180,
     "groupNumber": 6,
     "baserent": 14,
@@ -254,12 +234,14 @@
     "rent3": 550,
     "rent4": 750,
     "rent5": 950,
-    "imageName": "Pancake_swap.png"
+    "imageName": "",
+    "index": 18
   },
   {
-    "name": "Chronicle",
+    "name": "Place Pigalle",
+    "type": "AVENUE",
     "pricetext": "$200",
-    "color": "#FFA500",
+    "color": "orange",
     "price": 200,
     "groupNumber": 6,
     "baserent": 16,
@@ -268,25 +250,22 @@
     "rent3": 600,
     "rent4": 800,
     "rent5": 1000,
-    "imageName": "Chronicle.png"
+    "imageName": "",
+    "index": 19
   },
   {
     "name": "Free Parking",
+    "type": "PARKING",
     "pricetext": "",
     "color": "#FFFFFF",
-    "price": "",
-    "groupNumber": "",
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 20
   },
   {
-    "name": "1inch",
+    "name": "Matignon Avenue",
+    "type": "AVENUE",
     "pricetext": "$220",
-    "color": "#FF0000",
+    "color": "red",
     "price": 220,
     "groupNumber": 7,
     "baserent": 18,
@@ -295,23 +274,20 @@
     "rent3": 700,
     "rent4": 875,
     "rent5": 1050,
-    "imageName": "1inch.jpeg"
+    "imageName": "",
+    "index": 21
   },
   {
     "name": "Chance",
+    "type": "CHANCE",
     "pricetext": "FOLLOW INSTRUCTIONS ON TOP CARD",
     "color": "#FFFFFF",
-    "price": "",
-    "groupNumber": "",
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 22
   },
   {
-    "name": "Blockscout",
+    "name": "Boulevard Malesherbes",
+    "type": "AVENUE",
     "pricetext": "$220",
     "color": "#FF0000",
     "price": 220,
@@ -322,12 +298,14 @@
     "rent3": 700,
     "rent4": 875,
     "rent5": 1050,
-    "imageName": "Blockscout.jpg"
+    "imageName": "",
+    "index": 23
   },
   {
-    "name": "Arbitrum",
+    "name": "Avenue Henri-Martin",
+    "type": "AVENUE",
     "pricetext": "$240",
-    "color": "#FF0000",
+    "color": "red",
     "price": 240,
     "groupNumber": 7,
     "baserent": 20,
@@ -336,25 +314,24 @@
     "rent3": 750,
     "rent4": 925,
     "rent5": 1100,
-    "imageName": "Arbitrum.png"
+    "imageName": "",
+    "index": 24
   },
   {
-    "name": "Arbitrum Railraod",
-    "pricetext": "$200",
+    "name": "North Railroad",
+    "type": "RAILROAD",
+    "pricetext": "$25",
     "color": "#FFFFFF",
     "price": 200,
     "groupNumber": 1,
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 25
   },
   {
-    "name": "Flare",
+    "name": "Suburb Saint-Honor",
+    "type": "AVENUE",
     "pricetext": "$260",
-    "color": "#FFFF00",
+    "color": "yellow",
     "price": 260,
     "groupNumber": 8,
     "baserent": 22,
@@ -363,12 +340,14 @@
     "rent3": 800,
     "rent4": 975,
     "rent5": 1150,
-    "imageName": "Flare.png"
+    "imageName": "",
+    "index": 26
   },
   {
-    "name": "Uniswap",
+    "name": "Place Purse",
+    "type": "AVENUE",
     "pricetext": "$260",
-    "color": "#FFFF00",
+    "color": "yellow",
     "price": 260,
     "groupNumber": 8,
     "baserent": 22,
@@ -377,25 +356,24 @@
     "rent3": 800,
     "rent4": 975,
     "rent5": 1150,
-    "imageName": "Uniswap.png"
+    "imageName": "",
+    "index": 27
   },
   {
     "name": "Water Works",
+    "type": "WATER",
     "pricetext": "$150",
     "color": "#FFFFFF",
     "price": 150,
     "groupNumber": 2,
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 28
   },
   {
-    "name": "Ethereum",
+    "name": "Street of Fayette",
+    "type": "AVENUE",
     "pricetext": "$280",
-    "color": "#FFFF00",
+    "color": "yellow",
     "price": 280,
     "groupNumber": 8,
     "baserent": 24,
@@ -404,25 +382,22 @@
     "rent3": 850,
     "rent4": 1025,
     "rent5": 1200,
-    "imageName": "Ethereum.jpeg"
+    "imageName": "",
+    "index": 29
   },
   {
     "name": "Go to Jail",
+    "type": "JAIL",
     "pricetext": "Go directly to Jail. Do not pass GO. Do not collect $200.",
     "color": "#FFFFFF",
-    "price": "",
-    "groupNumber": "",
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 30
   },
   {
-    "name": "Filecoin",
+    "name": "Avenue of Breteuil",
+    "type": "AVENUE",
     "pricetext": "$300",
-    "color": "#008000",
+    "color": "green",
     "price": 300,
     "groupNumber": 9,
     "baserent": 26,
@@ -431,12 +406,14 @@
     "rent3": 900,
     "rent4": 110,
     "rent5": 1275,
-    "imageName": "Filecoin.png"
+    "imageName": "",
+    "index": 31
   },
   {
-    "name": "LayerZero",
+    "name": "Avenue Foch",
+    "type": "AVENUE",
     "pricetext": "$300",
-    "color": "#008000",
+    "color": "green",
     "price": 300,
     "groupNumber": 9,
     "baserent": 26,
@@ -445,25 +422,22 @@
     "rent3": 900,
     "rent4": 110,
     "rent5": 1275,
-    "imageName": "Layerzero.png"
+    "imageName": "",
+    "index": 32
   },
   {
     "name": "Community Chest",
+    "type": "COMMUNITY",
     "pricetext": "FOLLOW INSTRUCTIONS ON TOP CARD",
     "color": "#FFFFFF",
-    "price": "",
-    "groupNumber": "",
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 33
   },
   {
-    "name": "Worldcoin",
+    "name": "Boulevard of the Nasturtiums",
+    "type": "AVENUE",
     "pricetext": "$320",
-    "color": "#008000",
+    "color": "green",
     "price": 320,
     "groupNumber": 9,
     "baserent": 28,
@@ -472,38 +446,32 @@
     "rent3": 1000,
     "rent4": 1200,
     "rent5": 1400,
-    "imageName": "Worldcoin.png"
+    "imageName": "",
+    "index": 34
   },
   {
-    "name": "Short Line",
-    "pricetext": "$200",
+    "name": "Sainflazare Railroad",
+    "type": "RAILROAD",
+    "pricetext": "$25",
     "color": "#FFFFFF",
     "price": 200,
     "groupNumber": 1,
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 35
   },
   {
     "name": "Chance",
+    "type": "CHANCE",
     "pricetext": "FOLLOW INSTRUCTIONS ON TOP CARD",
     "color": "#FFFFFF",
-    "price": "",
-    "groupNumber": "",
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 36
   },
   {
-    "name": "Base",
+    "name": "Avenue of the Champs-Elysees",
+    "type": "AVENUE",
     "pricetext": "$350",
-    "color": "#0000FF",
+    "color": "dark-blue",
     "price": 350,
     "groupNumber": 10,
     "baserent": 35,
@@ -512,25 +480,22 @@
     "rent3": 1100,
     "rent4": 1300,
     "rent5": 1500,
-    "imageName": "Base.jpeg"
+    "imageName": "",
+    "index": 37
   },
   {
     "name": "LUXURY TAX",
+    "type": "LUXURY",
     "pricetext": "Pay $100",
     "color": "#FFFFFF",
-    "price": "",
-    "groupNumber": "",
-    "baserent": "",
-    "rent1": "",
-    "rent2": "",
-    "rent3": "",
-    "rent4": "",
-    "rent5": ""
+    "imageName": "",
+    "index": 38
   },
   {
-    "name": "Polygon",
+    "name": "Street of Peace",
+    "type": "AVENUE",
     "pricetext": "$400",
-    "color": "#0000FF",
+    "color": "dark-blue",
     "price": 400,
     "groupNumber": 10,
     "baserent": 50,
@@ -539,6 +504,7 @@
     "rent3": 1400,
     "rent4": 1700,
     "rent5": 2000,
-    "imageName": "Polygon.png"
+    "imageName": "",
+    "index": 39
   }
 ]

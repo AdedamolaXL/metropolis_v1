@@ -3,36 +3,39 @@ import chanceIcon from "../../../assets/question.png";
 import communityIcon from "../../../assets/chest.png";
 import railRoadIcon from "../../../assets/rail.png";
 import taxIcon from "../../../assets/tax.png";
-import { BOX_TYPES } from "../../../Constants";
+import { BOX_TYPES } from "../../../../backend/shared/constants";
 import "./boxTypes.scss";
 
-export const SpecialBox = ({
-  type,
-  name,
-  price,
-  pricetext,
-}: {
-  type: any;
-  name?: any;
-  price?: any;
-  pricetext?: any;
-}) => {
+type BoxType = keyof typeof BOX_TYPES;
+
+interface SpecialBoxProps {
+  type: BoxType;
+  name?: string;
+  price?: number;
+  pricetext?: string;
+}
+
+export const SpecialBox: React.FC<SpecialBoxProps> = ({ type, name, price, pricetext }) => {
+  const boxImages: { [key in BoxType]?: string } = {
+    GO: chanceIcon,
+    CHANCE: chanceIcon,
+    COMMUNITY: communityIcon,
+    RAILROADS: railRoadIcon,
+    TAX: taxIcon,
+  };
+
   const getBoxImage = () => {
-    if (type === BOX_TYPES.CHANCE)
-      return <img src={chanceIcon} alt={`${type} Icon`} />;
-    if (type === BOX_TYPES.COMMUNITY)
-      return <img src={communityIcon} alt={`${type} Icon`} />;
-    if (type === BOX_TYPES.RAILROADS)
-      return <img src={railRoadIcon} alt={`${type} Icon`} />;
-    if (type === BOX_TYPES.TAX)
-      return <img src={taxIcon} alt={`${type} Icon`} />;
+    const imageSrc = boxImages[type];
+    return imageSrc ? <img src={imageSrc} alt={`${type} Icon`} /> : null;
   };
 
   const getBoxText = () => {
-    if (type === BOX_TYPES.CHANCE) return "Chance";
-    if (type === BOX_TYPES.COMMUNITY) return "Community";
-    return name;
+    if (type === "CHANCE") return "Chance";
+    if (type === "COMMUNITY") return "Community";
+    
+    return name || ""; // Default to `name` if provided
   };
+  
   return (
     <div className="chance-box">
       <div className="box-text">{getBoxText()}</div>

@@ -1,0 +1,1 @@
+* the outcome of drawing a community card in future will apply to all players :D. So for example go to jail, everyone goes to jail..

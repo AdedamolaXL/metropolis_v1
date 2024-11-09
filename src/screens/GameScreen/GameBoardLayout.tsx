@@ -1,277 +1,379 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import data from "../../data/gameBlocks.json";
-import { SQUARE_TYPES } from "../../Constants";
-import { GameBox } from "../../components";
-import { BOX_TYPES } from "../../Constants";
-import die1 from "../../assets/Die_1.png";
-import die2 from "../../assets/Die_2.png";
-import die3 from "../../assets/Die_3.png";
-import die4 from "../../assets/Die_4.png";
-import die5 from "../../assets/Die_5.png";
-import die6 from "../../assets/Die_6.png";
-import { monopolyInstance } from "../../models/Monopoly";
+import React, { useEffect, useState } from 'react';
+import { monopolyInstance } from '../../models/Monopoly';
+import { GameBoardSpace } from '../../../backend/shared/types';
+import GameBox from './GameBox';
+import './gameBoard.scss';
+import data from '../../../backend/shared/data/gameBlocks.json'
+import { BOX_TYPES, SquareType } from '../../../backend/shared/constants';
+import DiceControls from './DiceControl';
 
-export const GameBoardLayout = (props: {
-  players?: any;
-  onDiceRoll?: any;
-  diceValues?: any;
-  toggleLogs?: any;
-  showLogs?: any;
-  gameStatus?: any;
-  currentPlayer?: any;
-  toggleCurrentTurn?: any;
-  removePlayerFromGame?: any;
-}) => {
-  const {
-    onDiceRoll,
-    diceValues,
-    toggleLogs,
-    showLogs,
-    gameStatus,
-    currentPlayer,
-  } = props;
 
-  const getGameBottomSide = () => data.slice(0, 11).reverse();
+interface GameBoardLayoutProps {
+  onTileClick: (getTileData: GameBoardSpace) => void;
+} 
 
-  const getGameLeftSide = () => [...data.slice(11, 20).reverse()];
 
-  const getGameRightSide = () => data.slice(31, 40);
 
-  const getGameTopSide = () => data.slice(20, 31).reverse();
 
-  const getBoxType = (
-    boxElement:
-      | {
-          name: string;
-          pricetext: string;
-          color: string;
-          price: string;
-          groupNumber: string;
-          baserent: string;
-          rent1: string;
-          rent2: string;
-          rent3: string;
-          rent4: string;
-          rent5: string;
-        }
-      | {
-          name: string;
-          pricetext: string;
-          color: string;
-          price: number;
-          groupNumber: number;
-          baserent: number;
-          rent1: number;
-          rent2: number;
-          rent3: number;
-          rent4: number;
-          rent5: number;
-        }
-      | {
-          name: string;
-          pricetext: string;
-          color: string;
-          price: number;
-          groupNumber: number;
-          baserent: string;
-          rent1: string;
-          rent2: string;
-          rent3: string;
-          rent4: string;
-          rent5: string;
-        }
-  ) => {
-    const { name, pricetext, baserent, price } = boxElement;
-    const nameInLowerCase = name.toLowerCase();
-    if (nameInLowerCase === "go") {
-      return { type: BOX_TYPES.GO, price: 200 };
-    } else if (nameInLowerCase.includes("tax"))
-      return {
-        type: BOX_TYPES.TAX,
-        price: parseInt(pricetext.replace(/^\D+/g, "")),
-      };
-    else if (nameInLowerCase === "just visiting")
-      return { type: BOX_TYPES.JAIL, price: null };
-    else if (nameInLowerCase === "free parking")
-      return { type: BOX_TYPES.PARKING, price: null };
-    else if (nameInLowerCase === "chance")
-      return { type: BOX_TYPES.CHANCE, price: null };
-    else if (nameInLowerCase === "community chest")
-      return { type: BOX_TYPES.COMMUNITY, price: null };
-    else if (nameInLowerCase === "go to jail")
-      return { type: BOX_TYPES.GO_TO_JAIL, price: null };
-    else if (
-      nameInLowerCase.includes("railroad") ||
-      nameInLowerCase.includes("short line")
-    )
-      return { type: BOX_TYPES.RAILROADS, price };
-    else if (typeof baserent === "string" && typeof price === "number")
-      return {
-        type: BOX_TYPES.UTILITIES,
-        price,
-      };
-    else if (typeof baserent === "number")
-      return {
-        type: BOX_TYPES.AVENUE,
-        price,
-      };
+const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({ 
+  onTileClick,
+  }) => {
+  const [boardData, setBoardData] = useState<GameBoardSpace[]>([]);
+  const [players, setPlayers] = useState(monopolyInstance.players.getArray());
+  const [positions, setPositions] = useState<Record<string, number>>({});
+
+
+
+  console.log("Board Data:", boardData);
+  console.log("Players:", monopolyInstance.players.getArray());
+  console.log("Positions:", monopolyInstance.playerPositions);
+  console.log(monopolyInstance)
+
+  
+
+  useEffect(() => {
+    // Load the board data from Monopoly instance and subscribe to changes
+    setBoardData(monopolyInstance.boardData);
+
+    // console.log("Board Data:", monopolyInstance.boardData);
+
+
+    const unsubscribe = monopolyInstance.subscribe(() => {
+      setPlayers(monopolyInstance.players.getArray());
+      setPositions(monopolyInstance.playerPositions);
+    });
+
+    
+    
+
+    // monopolyInstance.socket.on('diceRolled', ({ playerName, currentIndex }) => {
+    //   setPositions((prevPositions) => ({
+    //     ...prevPositions,
+    //     [playerName]: currentIndex
+    //   }));
+    // });
+
+    
+
+    return () => {
+      unsubscribe();
+      monopolyInstance.socket.off('diceRolled');
+    }
+  }, []);
+
+
+ 
+ 
+
+
+
+
+  const getTileData = (tileData: any): GameBoardSpace => {
+    // map type to specific value in GameBoardSpace
+    const boxType = getBoxType(tileData);
+
+    const propertyData = tileData.propertyData || {
+      id: tileData.index,
+      name: tileData.name,
+      owner: null,  // Default owner is null
+      color: tileData.color,
+      price: tileData.price,
+      rentLevel: 1,  // Assuming rentLevel starts at 1, adjust as needed
+      rent: tileData.rent1 || 0
+    }
+
+    return {
+      ...tileData,
+      type: (boxType?.type || tileData.type) as keyof typeof BOX_TYPES,
+      price: boxType?.price || tileData.price || 0,
+      index: tileData.index, // ensure index is passed along
+      currentPlayer: tileData.currentPlayer || null, // add currentPlayer (if applicable)
+      propertyData: propertyData
+      
+    } as GameBoardSpace;
   };
 
-  const getDiceImage = (diceValue: number) => {
-    if (diceValue === 1) return die1;
-    if (diceValue === 2) return die2;
-    if (diceValue === 3) return die3;
-    if (diceValue === 4) return die4;
-    if (diceValue === 5) return die5;
-    if (diceValue === 6) return die6;
+
+  // Helper functions to get board sides
+  const getBottomSquare = () => data.slice(1, 10).reverse();
+  const getLeftSquare = () => data.slice(11, 20).reverse();
+  const getTopSquare = () => data.slice(21, 30);
+  const getRightSquare = () => data.slice(31, 40);
+
+
+
+  const getGoCorner = () => data.slice(0, 1).reverse();
+  const getVisitingCorner = () => data.slice(10, 11).reverse();
+  const getParkingCorner = () => data.slice(20, 21).reverse();
+  const getJailCorner = () => data.slice(30, 31).reverse();
+
+  const getBoxType = (boxElement: any) => {
+    const nameInLowerCase = boxElement.name.toLowerCase();
+    
+    if (nameInLowerCase === "go") return { type: BOX_TYPES.GO, price: 200 };
+    if (nameInLowerCase === "visiting") return { type: BOX_TYPES.VISITING, price: null };
+    if (nameInLowerCase === "parking") return { type: BOX_TYPES.PARKING, price: null };
+    if (nameInLowerCase === "jail") return { type: BOX_TYPES.JAIL, price: null };
+
+    if (nameInLowerCase.includes("luxury")) {
+      return {
+        type: BOX_TYPES.LUXURY,
+        price: parseInt(boxElement.pricetext.replace(/^\D+/g, "")),
+      };
+    }
+
+    if (nameInLowerCase.includes("income")) {
+      return {
+        type: BOX_TYPES.INCOME,
+        price: parseInt(boxElement.pricetext.replace(/^\D+/g, "")),
+      };
+    }
+    
+    if (nameInLowerCase === "chance") return { type: BOX_TYPES.CHANCE, price: null };
+    if (nameInLowerCase === "community chest") return { type: BOX_TYPES.COMMUNITY, price: null };
+
+    
+    if (nameInLowerCase.includes("railroad") || nameInLowerCase.includes("short line")) {
+      return { type: BOX_TYPES.RAILROADS, price: boxElement.price };
+    }
+    
+    if (nameInLowerCase.includes("electric")) {
+      return { type: BOX_TYPES.ELECTRIC, price: boxElement.price };
+    }
+
+    if (nameInLowerCase.includes("water")) {
+      return { type: BOX_TYPES.WATER, price: boxElement.price };
+    }
+    
+    if (typeof boxElement.baserent === "number") {
+      return { 
+        type: BOX_TYPES.AVENUE, 
+        price: boxElement.price,
+        propertyData: {
+          id: boxElement.index,
+          name: boxElement.name,
+          owner: boxElement.owner || null,
+          color: boxElement.color,
+          price: boxElement.price,
+          rentLevel: boxElement.rentLevel || 1,  // Assuming rentLevel exists in the boardData
+          rent: boxElement.rent1,  // Can be modified based on rent structure
+        },
+      };
+    }
+    
+    return null;
   };
+
+
+  
+
 
   return (
-    <div className="mainSquare">
-      <div className="row top">
-        {getGameTopSide().map((element, index) => {
-          if (index === 0 || index === 10) {
-            return (
-              <GameBox
-                type={SQUARE_TYPES.CORNER_SQUARE}
-                id={20 + index + 1}
-                key={index}
-                boxType={getBoxType(element)}
-                {...element}
-                {...props}
-              />
-            );
-          }
-          return (
-            <GameBox
-              type={SQUARE_TYPES.VERTICAL_SQUARE}
-              id={20 + index + 1}
-              key={index}
-              boxType={getBoxType(element)}
-              {...element}
-              {...props}
-            />
-          );
-        })}
-      </div>
-      <div className="row center">
-        <div className="corner-square">
-          {getGameLeftSide().map((element, index) => {
-            return (
-              <GameBox
-                type={SQUARE_TYPES.SIDE_SQUARE}
-                id={11 + (9 - index)}
-                key={index}
-                boxType={getBoxType(element)}
-                {...element}
-                {...props}
-              />
-            );
-          })}
-        </div>
-        <div className="center-square">
-          <div className="center-square-container">
-            <div className="balance-wrap">
-              <div className="player-balance">
-                <b> Balances</b>
-              </div>
+    
+      <div className='table'>
+       
+      <div className='board'>
 
-              {[...props.players].map(({ balance, color, name }, index) => (
-                <div className="player-balance">
-                  <div
-                    style={{ border: `2px solid ${color}` }}
-                    className="player-balance-item"
-                  >
-                    <span>
-                      {name} ${balance}
-                      {!index ? <span style={{ color: "red" }}>*</span> : ""}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+      
+      
+        <div className='center'>
+        
+          
+          {/* <div className='community-chest-deck'>
+            <h2 className='label'>Community Chest</h2>
+            <div className='deck'></div>
+          </div> */}
+        
+          <h1 className='title'>METROPOLIS</h1>
 
-            <div className="dices">
-              {getDiceImage(diceValues.one) && (
-                <img
-                  src={getDiceImage(diceValues.one)}
-                  alt="Dice 1"
-                  className="dice-1"
-                />
-              )}
-              {getDiceImage(diceValues.two) && (
-                <img
-                  src={getDiceImage(diceValues.two)}
-                  alt="Dice 2"
-                  className="dice-2"
-                />
-              )}
-            </div>
-
-            {showLogs && (
-              <div className="logs">
-                <ul>
-                  <button className="close-logs-btn" onClick={toggleLogs}>
-                    ✗
-                  </button>
-                  {monopolyInstance.logs.map((log) => (
-                    <li>{log}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <div style={{ marginTop: "3rem" }}>
-              {gameStatus ? (
-                <button
-                  type="button"
-                  onClick={onDiceRoll}
-                  className="roll-dice-1"
-                >
-                  Roll Dices
-                </button>
-              ) : (
-                <div className="game-over">
-                  Game Over {currentPlayer.name} Wins{" "}
-                </div>
-              )}
-
-              <button type="button" onClick={toggleLogs} className="show-logs">
-                {showLogs ? "Hide" : "Show"} Logs
-              </button>
-            </div>
+          <div className='chance-deck'>
+            <h2 className='label'>Chance</h2>
+            <div className='deck'></div>
           </div>
+
+          
+
+          <div className="player-info">
+            {players.map((player) => (
+              <div 
+              className={`player-column ${
+                monopolyInstance.players.current()?.id === player.id ? 'current-turn' : ''
+              }`} 
+              key={player.id}
+            >
+              <div className="player-name">{player.name}</div>
+              <div className="player-color">{player.color}</div>
+              <div className="player-balance">Balance: ${player.balance}</div>
+              {monopolyInstance.players.current()?.id === player.id && (
+                  <div className="current-turn-indicator">Current Turn</div>
+                )}
+              </div>
+            ))}
+          </div>
+
+
+          <DiceControls />
+         
+          
+
+
         </div>
-        <div className="corner-square">
-          {getGameRightSide().map((element, index) => {
+        
+        
+        
+        <div className='space corner go'>
+          {getGoCorner().map((tile, index) => {
+            
             return (
               <GameBox
-                type={SQUARE_TYPES.SIDE_SQUARE}
-                id={31 + index + 1}
+                id={0}
                 key={index}
-                boxType={getBoxType(element)}
-                {...element}
-                {...props}
+                square={SquareType.CORNER_SQUARE}
+                tileData={getTileData(tile)}
+                players={players}
+                playerPositions={positions}
+                onClick={() => onTileClick(getTileData(tile))}
+                {...tile}
+
               />
             );
           })}
         </div>
+
+
+
+        <div className='row horizontal-row bottom-row'>
+        {getBottomSquare().map((tile, index) => {
+        
+            return (
+              <GameBox
+                id={index + 1}
+                key={index}
+                square={SquareType.HORIZONTAL_SQUARE}
+                tileData={getTileData(tile)}
+                players={players}
+                playerPositions={positions}
+                onClick={() => onTileClick(getTileData(tile))}
+                {...tile}
+              />
+            );
+          })}
+        </div>
+
+
+        <div className='space corner jail'>
+        {getVisitingCorner().map((tile, index) => {
+            return (
+              <GameBox
+                id={10}
+                key={index}
+                square={SquareType.CORNER_SQUARE}
+                tileData={getTileData(tile)}
+                players={players}
+                playerPositions={positions}
+                onClick={() => onTileClick(getTileData(tile))}
+                {...tile}
+              />
+            );
+          })}
+        </div>
+
+
+        <div className='row vertical-row left-row'>
+        {getLeftSquare().map((tile, index) => {
+            return (
+              <GameBox
+                id={index + 11}
+                key={index}
+                square={SquareType.VERTICAL_SQUARE}
+                tileData={getTileData(tile)}
+                players={players}
+                playerPositions={positions}
+                onClick={() => onTileClick(getTileData(tile))}
+                {...tile}
+              />
+            );
+          })}
+        </div>
+
+
+        <div className='space corner free-parking'>
+        {getParkingCorner().map((tile, index) => {
+            return (
+              <GameBox
+                id={20}
+                key={index}
+                square={SquareType.CORNER_SQUARE}
+                tileData={getTileData(tile)}
+                players={players}
+                playerPositions={positions}
+                onClick={() => onTileClick(getTileData(tile))}
+                {...tile}
+              />
+            );
+          })}
+        </div>
+
+
+        <div className='row horizontal-row top-row'>
+        {getTopSquare().map((tile, index) => {
+            return (
+              <GameBox
+                id={index + 21}
+                key={index}
+                square={SquareType.CORNER_SQUARE}
+                tileData={getTileData(tile)}
+                players={players}
+                playerPositions={positions}
+                onClick={() => onTileClick(getTileData(tile))}
+                {...tile}
+              />
+            );
+          })}
+        </div>
+
+
+        <div className='space corner go-to-jail'>
+        {getJailCorner().map((tile, index) => {
+            return (
+              <GameBox
+                id={30}
+                key={index}
+                square={SquareType.CORNER_SQUARE}
+                tileData={getTileData(tile)}
+                players={players}
+                playerPositions={positions}
+                onClick={() => onTileClick(getTileData(tile))}
+                {...tile}
+              />
+            );
+          })}
+        </div>
+
+
+        <div className='row vertical-row right-row'>
+        {getRightSquare().map((tile, index) => {
+            return (
+              <GameBox
+                id={index + 31}
+                key={index}
+                square={SquareType.VERTICAL_SQUARE}
+                tileData={getTileData(tile)}
+                players={players}
+                playerPositions={positions}
+                onClick={() => onTileClick(getTileData(tile))}
+                {...tile}
+              />
+            );
+          })}
+        </div>
+
+
       </div>
-      <div className="row top">
-        {getGameBottomSide().map((element, index) => (
-          <GameBox
-            type={
-              index === 0 || index === 10
-                ? SQUARE_TYPES.CORNER_SQUARE
-                : SQUARE_TYPES.VERTICAL_SQUARE
-            }
-            id={11 - index}
-            key={index}
-            boxType={getBoxType(element)}
-            {...element}
-            {...props}
-          />
-        ))}
       </div>
-    </div>
+    
   );
 };
+
+export default GameBoardLayout;
+
