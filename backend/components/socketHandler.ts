@@ -64,11 +64,14 @@ export function setupSocketHandlers(io: Server) {
     // Handle player buying a property
     // In socketHandler.ts
 
-socket.on('buyProperty', (propertyId) => {
+socket.on('buyProperty', (propertyId: number) => {
+  console.log('Attempting to buy property with ID:', propertyId);
   const player = gameManager.getCurrentPlayer();
+  console.log('Current player:', player); 
   if (player) {
     const success = gameManager.buyProperty(player.id, propertyId);
     if (success) {
+      console.log('Property bought successfully, updating game state');
       io.emit('updateProperties', gameManager.getGameState().properties);
       io.emit('updatePlayers', gameManager.getGameState().players);
       io.emit('gameState', gameManager.getGameState());

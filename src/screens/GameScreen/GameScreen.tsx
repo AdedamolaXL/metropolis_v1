@@ -13,6 +13,9 @@ const GameScreen: React.FC = () => {
   const [selectedTile, setSelectedTile] = useState<GameBoardSpace | null>(null);
   const navigate = useNavigate()
   const [refresh, setRefresh] = useState(true)
+
+
+ 
   
 
   useEffect(() => {
@@ -26,15 +29,29 @@ const GameScreen: React.FC = () => {
   const handleTileClick = (tile: GameBoardSpace) => {
     setSelectedTile(tile);
     console.log('Tile clicked:', tile);
-    // Additional logic to display tile info or enable buy/rent options
   };
+  
+  useEffect(() => {
+    console.log('Selected Tile after click:', selectedTile?.propertyData);
+  }, [selectedTile]);
 
 
   const handleBuyProperty = () => {
-    if (selectedTile) {
-      monopolyInstance.buyProperty(selectedTile);
+    if (selectedTile && selectedTile.propertyData) {
+      const propertyId = selectedTile.propertyData.id;
+      if (propertyId !== undefined) {
+        console.log('Property ID:', propertyId); // Check if this logs correctly
+        monopolyInstance.buyProperty(propertyId);
+      } else {
+        console.log("Property ID is undefined.");
+      }
+    } else {
+      console.log("No tile selected or no property data available.");
     }
   };
+  
+
+  console.log('Selected Tile propertyData:', selectedTile?.propertyData);
 
   const handleRentProperty = () => {
     if (selectedTile) {

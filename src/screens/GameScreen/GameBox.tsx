@@ -21,10 +21,18 @@ const GameBox: React.FC<GameBoxProps> = ({ tileData, players, square, id, player
     .map(([playerId]) => players.find(player => player.name === playerId)) // Get the player data from the players array
     .filter((player): player is ClientPlayerData => player !== undefined); 
   
+
+  //     const currentTileData = tileData.find(tile => tile.id === id);
+  //     console.log(`Tile ${id} (${currentTileData?.type || 'unknown'}) has ${playersOnTile.length} player(s):`, {
+  //         players: playersOnTile,
+  //         tileData: currentTileData
+  //     });
+  // }
   // console.log(players)
-  // console.log(`Tile ${id}:`, playersOnTile);
+  
   // console.log(playerPositions)
   // console.log(`Tile data for ID ${id}:`, tileData);
+  // console.log(tileData)
 
   const [showPopup, setShowPopup] = useState(false);
   const [popupContent, setPopupContent] = useState<{ playerName: string; tileName: string } | null>(null);
@@ -230,6 +238,7 @@ const GameBox: React.FC<GameBoxProps> = ({ tileData, players, square, id, player
       )}
 
       {/* Pop-up when player lands on a tile */}
+{/*       
       {showPopup && popupContent && (
         <div className="popup">
           <div className="popup-content">
@@ -237,7 +246,8 @@ const GameBox: React.FC<GameBoxProps> = ({ tileData, players, square, id, player
             <button onClick={closePopup}>Close</button>
           </div>
         </div>
-      )}
+      )} */}
+
       </div>
     </div>
   );

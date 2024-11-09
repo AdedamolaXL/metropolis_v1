@@ -72,7 +72,26 @@ class Monopoly {
 
     this.socket.on('gameBoardData', (data: GameBoardSpace[]) => {
       this.boardData = data;  
+      console.log("Board Data updated:", this.boardData);
     });
+
+    this.socket.on('gameState', (gameState) => {
+      console.log('Game state updated:', gameState);
+    });
+
+    this.socket.on('updateProperties', (properties) => {
+      console.log('Updated properties:', properties);
+    });
+    
+    this.socket.on('updatePlayers', (players) => {
+      console.log('Updated players:', players);
+    });
+    
+    this.socket.on('gameState', (gameState) => {
+      console.log('Updated game state:', gameState);
+    });
+    
+    
 
     // this.socket.on('diceRolled', ({ playerName, roll, currentIndex }) => {
     //   const currentPlayer = this.players.find(player => player.name === playerName);
@@ -260,8 +279,9 @@ public rollDice(): void {
   }
 
 
-  public buyProperty(property: GameBoardSpace): void {
-    this.socket.emit('buyProperty', property.name);
+  public buyProperty(propertyId: number): void {
+    this.socket.emit('buyProperty', propertyId);
+    console.log('Attempting to buy property with ID:', propertyId);
   }
 
   public drawCard(cardType: 'CHANCE' | 'COMMUNITY'): void {

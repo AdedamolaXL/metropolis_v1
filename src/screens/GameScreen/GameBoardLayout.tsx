@@ -28,14 +28,14 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
   console.log("Players:", monopolyInstance.players.getArray());
   console.log("Positions:", monopolyInstance.playerPositions);
   console.log(monopolyInstance)
-  console.log(positions)
+
   
 
   useEffect(() => {
     // Load the board data from Monopoly instance and subscribe to changes
     setBoardData(monopolyInstance.boardData);
 
-    
+    // console.log("Board Data:", monopolyInstance.boardData);
 
 
     const unsubscribe = monopolyInstance.subscribe(() => {
@@ -71,12 +71,28 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
   const getTileData = (tileData: any): GameBoardSpace => {
     // map type to specific value in GameBoardSpace
     const boxType = getBoxType(tileData);
+
+    const propertyData = tileData.propertyData || {
+      id: tileData.index,
+      name: tileData.name,
+      owner: null,  // Default owner is null
+      color: tileData.color,
+      price: tileData.price,
+      rentLevel: 1,  // Assuming rentLevel starts at 1, adjust as needed
+      rent: tileData.rent1 || 0
+    }
+
     return {
       ...tileData,
       type: (boxType?.type || tileData.type) as keyof typeof BOX_TYPES,
       price: boxType?.price || tileData.price || 0,
+      index: tileData.index, // ensure index is passed along
+      currentPlayer: tileData.currentPlayer || null, // add currentPlayer (if applicable)
+      propertyData: propertyData
+      
     } as GameBoardSpace;
   };
+
 
   // Helper functions to get board sides
   const getBottomSquare = () => data.slice(1, 10).reverse();
@@ -130,14 +146,26 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
     }
     
     if (typeof boxElement.baserent === "number") {
-      return { type: BOX_TYPES.AVENUE, price: boxElement.price };
+      return { 
+        type: BOX_TYPES.AVENUE, 
+        price: boxElement.price,
+        propertyData: {
+          id: boxElement.index,
+          name: boxElement.name,
+          owner: boxElement.owner || null,
+          color: boxElement.color,
+          price: boxElement.price,
+          rentLevel: boxElement.rentLevel || 1,  // Assuming rentLevel exists in the boardData
+          rent: boxElement.rent1,  // Can be modified based on rent structure
+        },
+      };
     }
     
     return null;
   };
 
 
-
+  
 
 
   return (
@@ -195,6 +223,7 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
         
         <div className='space corner go'>
           {getGoCorner().map((tile, index) => {
+            
             return (
               <GameBox
                 id={0}
@@ -213,6 +242,7 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
 
         <div className='row horizontal-row bottom-row'>
         {getBottomSquare().map((tile, index) => {
+        
             return (
               <GameBox
                 id={index + 1}

@@ -21,12 +21,35 @@ export class GameManager {
   private loadBoardData(): GameBoardSpace[] {
     try {
       const boardDataPath = path.join(__dirname, '../shared/data/gameBlocks.json');
-      const boardData = JSON.parse(fs.readFileSync(boardDataPath, 'utf8'));
-      return boardData as GameBoardSpace[];
+      const rawData = JSON.parse(fs.readFileSync(boardDataPath, 'utf8'));
+
+      // Map over the raw board data to add missing fields
+      const boardData = rawData.map((tile: any, index: number) => ({
+        ...tile,
+        index,                      // Ensures each tile has an index
+        currentPlayer: null,        // Default to null, will be updated dynamically in the game
+        propertyData: {
+          id: index,
+          name: tile.name,
+          owner: null,
+          color: tile.color,
+          price: Number(tile.price),
+          // imageName: tile.imageName || undefined,
+          rentLevel: tile.rentLevel || 1,
+          rent: tile.rent1 || 0,
+          // groupNumber: tile.groupNumber || undefined,
+        } as Property   // Default to null unless assigned a Property object
+      })) as GameBoardSpace[];
+
+      console.log('Board Data:', JSON.stringify(boardData, null, 2));
+      return boardData;
+      
     } catch (error) {
       throw new Error('Failed to load board data');
     }
   }
+
+  
 
   getBoardData(): GameBoardSpace[] {
     return this.boardData;
@@ -218,12 +241,18 @@ export class GameManager {
     const player = this.players.find((p) => p.id === playerId);
     const property = this.properties[propertyId];
 
+    console.log('Buying property with ID:', propertyId);
+    console.log('Player:', player);
+    console.log('Property:', property);
+
     if (!player || !property || property.owner) return false;
     if (player.wealth >= property.price) {
       player.wealth -= property.price;
       property.owner = player.id;
+      console.log('Property purchased successfully');
       return true;
     }
+    console.log('Insufficient funds or property already owned');
     return false;
   }
 

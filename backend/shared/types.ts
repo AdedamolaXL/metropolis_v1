@@ -64,6 +64,7 @@ export interface GameBoardSpace {
   imageName?: string;
   index: number;
   currentPlayer?: ServerPlayerData | null;
+  propertyData?: Property;
 }
 
 export interface DiceRoll {

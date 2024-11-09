@@ -4,7 +4,8 @@
     "type": "G0",
     "pricetext": "COLLECT $200 SALARY AS YOU PASS.",
     "color": "#FFFFFF",
-    "imageName": ""
+    "imageName": "",
+    "index": 0
   },
   {
     "name": "Boulevard of Belleville",
@@ -19,14 +20,16 @@
     "rent3": 90,
     "rent4": 160,
     "rent5": 250,
-    "imageName": ""
+    "imageName": "",
+    "index": 1
   },
   {
     "name": "Community Chest",
     "type": "COMMUNITY",
     "pricetext": "FOLLOW INSTRUCTIONS ON THE CARD",
     "color": "#FFFFFF",
-    "imageName": ""
+    "imageName": "",
+    "index": 2
   },
   {
     "name": "Street Lecourbe",
@@ -41,14 +44,16 @@
     "rent3": 180,
     "rent4": 320,
     "rent5": 450,
-    "imageName": ""
+    "imageName": "",
+    "index": 3
   },
   {
     "name": "Income Tax",
     "type": "INCOME",
     "pricetext": "Pay $200",
     "color": "#FFFFFF",
-    "imageName": ""
+    "imageName": "",
+    "index": 4
   },
   {
     "name": "Montparnasse Railroad",
@@ -57,7 +62,8 @@
     "color": "#FFFFFF",
     "price": 200,
     "groupNumber": 1,
-    "imageName": ""
+    "imageName": "",
+    "index": 5
   },
   {
     "name": "Street of Vaugirard",
@@ -72,14 +78,16 @@
     "rent3": 270,
     "rent4": 400,
     "rent5": 550,
-    "imageName": ""
+    "imageName": "",
+    "index": 6
   },
   {
     "name": "Chance",
     "type": "CHANCE",
     "pricetext": "FOLLOW INSTRUCTIONS ON TOP CARD",
     "color": "#FFFFFF",
-    "imageName": ""
+    "imageName": "",
+    "index": 7
   },
   {
     "name": "Street of Courcelles",
@@ -94,7 +102,8 @@
     "rent3": 270,
     "rent4": 400,
     "rent5": 550,
-    "imageName": ""
+    "imageName": "",
+    "index": 8
   },
   {
     "name": "Avenue of the Republic",
@@ -109,14 +118,16 @@
     "rent3": 300,
     "rent4": 450,
     "rent5": 600,
-    "imageName": ""
+    "imageName": "",
+    "index": 9
   },
   {
     "name": "Just Visiting || Jail",
     "type": "VISITING",
     "pricetext": "",
     "color": "#FFFFFF",
-    "imageName": ""
+    "imageName": "",
+    "index": 10
   },
   {
     "name": "Boulevard of the Villette",
@@ -131,7 +142,8 @@
     "rent3": 450,
     "rent4": 625,
     "rent5": 750,
-    "imageName": ""
+    "imageName": "",
+    "index": 11
   },
   {
     "name": "Electric Company",
@@ -140,7 +152,8 @@
     "color": "#FFFFFF",
     "price": 150,
     "groupNumber": 2,
-    "imageName": ""
+    "imageName": "",
+    "index": 12
   },
   {
     "name": "Avenue of Neuilly",
@@ -155,7 +168,8 @@
     "rent3": 450,
     "rent4": 625,
     "rent5": 750,
-    "imageName": ""
+    "imageName": "",
+    "index": 13
   },
   {
     "name": "Frue of Paradise",
@@ -170,7 +184,8 @@
     "rent3": 500,
     "rent4": 700,
     "rent5": 900,
-    "imageName": ""
+    "imageName": "",
+    "index": 14
   },
   {
     "name": "Lyon Railroad",
@@ -179,7 +194,8 @@
     "color": "#FFFFFF",
     "price": 200,
     "groupNumber": 1,
-    "imageName": ""
+    "imageName": "",
+    "index": 15
   },
   {
     "name": "Mozart Avenue",
@@ -194,14 +210,16 @@
     "rent3": 550,
     "rent4": 750,
     "rent5": 950,
-    "imageName": ""
+    "imageName": "",
+    "index": 16
   },
   {
     "name": "Community Chest",
     "type": "COMMUNITY",
     "pricetext": "FOLLOW INSTRUCTIONS ON TOP CARD",
     "color": "#FFFFFF",
-    "imageName": ""
+    "imageName": "",
+    "index": 17
   },
   {
     "name": "Boulevard Saint-Michel",
@@ -216,7 +234,8 @@
     "rent3": 550,
     "rent4": 750,
     "rent5": 950,
-    "imageName": ""
+    "imageName": "",
+    "index": 18
   },
   {
     "name": "Place Pigalle",
@@ -231,14 +250,16 @@
     "rent3": 600,
     "rent4": 800,
     "rent5": 1000,
-    "imageName": ""
+    "imageName": "",
+    "index": 19
   },
   {
     "name": "Free Parking",
     "type": "PARKING",
     "pricetext": "",
     "color": "#FFFFFF",
-    "imageName": ""
+    "imageName": "",
+    "index": 20
   },
   {
     "name": "Matignon Avenue",
@@ -253,14 +274,16 @@
     "rent3": 700,
     "rent4": 875,
     "rent5": 1050,
-    "imageName": ""
+    "imageName": "",
+    "index": 21
   },
   {
     "name": "Chance",
     "type": "CHANCE",
     "pricetext": "FOLLOW INSTRUCTIONS ON TOP CARD",
     "color": "#FFFFFF",
-    "imageName": ""
+    "imageName": "",
+    "index": 22
   },
   {
     "name": "Boulevard Malesherbes",
@@ -275,7 +298,8 @@
     "rent3": 700,
     "rent4": 875,
     "rent5": 1050,
-    "imageName": ""
+    "imageName": "",
+    "index": 23
   },
   {
     "name": "Avenue Henri-Martin",
@@ -290,7 +314,8 @@
     "rent3": 750,
     "rent4": 925,
     "rent5": 1100,
-    "imageName": ""
+    "imageName": "",
+    "index": 24
   },
   {
     "name": "North Railroad",
@@ -299,7 +324,8 @@
     "color": "#FFFFFF",
     "price": 200,
     "groupNumber": 1,
-    "imageName": ""
+    "imageName": "",
+    "index": 25
   },
   {
     "name": "Suburb Saint-Honor",
@@ -314,7 +340,8 @@
     "rent3": 800,
     "rent4": 975,
     "rent5": 1150,
-    "imageName": ""
+    "imageName": "",
+    "index": 26
   },
   {
     "name": "Place Purse",
@@ -329,7 +356,8 @@
     "rent3": 800,
     "rent4": 975,
     "rent5": 1150,
-    "imageName": ""
+    "imageName": "",
+    "index": 27
   },
   {
     "name": "Water Works",
@@ -338,7 +366,8 @@
     "color": "#FFFFFF",
     "price": 150,
     "groupNumber": 2,
-    "imageName": ""
+    "imageName": "",
+    "index": 28
   },
   {
     "name": "Street of Fayette",
@@ -353,14 +382,16 @@
     "rent3": 850,
     "rent4": 1025,
     "rent5": 1200,
-    "imageName": ""
+    "imageName": "",
+    "index": 29
   },
   {
     "name": "Go to Jail",
     "type": "JAIL",
     "pricetext": "Go directly to Jail. Do not pass GO. Do not collect $200.",
     "color": "#FFFFFF",
-    "imageName": ""
+    "imageName": "",
+    "index": 30
   },
   {
     "name": "Avenue of Breteuil",
@@ -375,7 +406,8 @@
     "rent3": 900,
     "rent4": 110,
     "rent5": 1275,
-    "imageName": ""
+    "imageName": "",
+    "index": 31
   },
   {
     "name": "Avenue Foch",
@@ -390,14 +422,16 @@
     "rent3": 900,
     "rent4": 110,
     "rent5": 1275,
-    "imageName": ""
+    "imageName": "",
+    "index": 32
   },
   {
     "name": "Community Chest",
     "type": "COMMUNITY",
     "pricetext": "FOLLOW INSTRUCTIONS ON TOP CARD",
     "color": "#FFFFFF",
-    "imageName": ""
+    "imageName": "",
+    "index": 33
   },
   {
     "name": "Boulevard of the Nasturtiums",
@@ -412,7 +446,8 @@
     "rent3": 1000,
     "rent4": 1200,
     "rent5": 1400,
-    "imageName": ""
+    "imageName": "",
+    "index": 34
   },
   {
     "name": "Sainflazare Railroad",
@@ -421,14 +456,16 @@
     "color": "#FFFFFF",
     "price": 200,
     "groupNumber": 1,
-    "imageName": ""
+    "imageName": "",
+    "index": 35
   },
   {
     "name": "Chance",
     "type": "CHANCE",
     "pricetext": "FOLLOW INSTRUCTIONS ON TOP CARD",
     "color": "#FFFFFF",
-    "imageName": ""
+    "imageName": "",
+    "index": 36
   },
   {
     "name": "Avenue of the Champs-Elysees",
@@ -443,14 +480,16 @@
     "rent3": 1100,
     "rent4": 1300,
     "rent5": 1500,
-    "imageName": ""
+    "imageName": "",
+    "index": 37
   },
   {
     "name": "LUXURY TAX",
     "type": "LUXURY",
     "pricetext": "Pay $100",
     "color": "#FFFFFF",
-    "imageName": ""
+    "imageName": "",
+    "index": 38
   },
   {
     "name": "Street of Peace",
@@ -465,6 +504,7 @@
     "rent3": 1400,
     "rent4": 1700,
     "rent5": 2000,
-    "imageName": ""
+    "imageName": "",
+    "index": 39
   }
 ]
