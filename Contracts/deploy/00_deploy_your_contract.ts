@@ -7,21 +7,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
+ console.log("deploying wallet: ",deployer)
 
-
-
-  // 3. Deploy MonopolyGameFactory contract (no constructor arguments needed)
-  await deploy("MonopolyGameFactory", {
+  // 3. Deploy Metropolis contract (no constructor arguments needed)
+  await deploy("Metropolis", {
     from: deployer,
     log: true,
   });
 
   // Get the deployed contracts
-  const monopolyGameFactory = await ethers.getContract("MonopolyGameFactory");
-console.log(monopolyGameFactory)
+  const Metropolis = await ethers.getContract("Metropolis");
+console.log(Metropolis)
 
-  console.log("MonopolyGameFactory deployed at:", monopolyGameFactory.target);
+  console.log("Metropolis deployed at:", Metropolis.target);
 };
 
 export default func;
-func.tags = ["MonopolyGameFactory"];
+func.tags = ["Metropolis"];
