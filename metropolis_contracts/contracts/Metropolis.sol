@@ -18,7 +18,7 @@ contract Metropolis is ERC1155, Ownable, AccessControl {
     struct Property {
         string name;
         uint256 price;
-        uint256 rent;
+        uint256[] rentLevels;
     }
 
     mapping(uint256 => Property) public properties;
@@ -60,22 +60,45 @@ contract Metropolis is ERC1155, Ownable, AccessControl {
         emit PropertyPurchased(msg.sender, propertyId);
     }
 
-    function getRent(uint256 propertyId) public view returns (uint256) {
-        return properties[propertyId].rent;
+    function getRent(uint256 propertyId, uint256 level) public view returns (uint256) {
+        require(
+            keccak256(abi.encodePacked(properties[propertyId].name)) != keccak256(abi.encodePacked("")),
+            "Property does not exist"
+        );
+        require(level < properties[propertyId].rentLevels.length, "Invalid rent level");
+        return properties[propertyId].rentLevels[level];
     }
 
     function addProperty(
         string memory name,
         uint256 price,
-        uint256 rent
+        uint256[] memory rentLevels
     ) public onlyOwner {
-        uint256 tokenId = _currentTokenId; // Use the current token ID
-        _currentTokenId++; // Increment for the next property
+        uint256 tokenId = _currentTokenId;
+        _currentTokenId++;
 
         properties[tokenId] = Property({
             name: name,
             price: price,
-            rent: rent
+            rentLevels: rentLevels // Store the rent levels array
+        });
+    }
+
+    function updateProperty(
+        uint256 propertyId,
+        string memory name,
+        uint256 price,
+        uint256[] memory rentLevels 
+    ) public onlyOwner {
+        require(
+            keccak256(abi.encodePacked(properties[propertyId].name)) != keccak256(abi.encodePacked("")),
+            "Property does not exist"
+        );
+
+        properties[propertyId] = Property({
+            name: name,
+            price: price,
+            rentLevels: rentLevels
         });
     }
 

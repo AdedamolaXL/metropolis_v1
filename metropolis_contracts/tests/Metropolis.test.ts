@@ -14,6 +14,7 @@ const setup = deployments.createFixture(async () => {
     };
 });
 
+
 describe("Metropolis", function () {
     describe("Minting and Buying", function () {
         it("should mint Monopoly money to a player", async function () {
@@ -31,7 +32,7 @@ describe("Metropolis", function () {
             const [owner, player1] = await ethers.getSigners();
 
             // Add a property
-            await Metropolis.addProperty("Mediterranean Avenue", 60, 2);
+            await Metropolis.addProperty("Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
 
             // Mint Monopoly money to player1
             await Metropolis.mintMonopolyMoney(player1.address, 1000);
@@ -64,7 +65,7 @@ describe("Metropolis", function () {
             const [owner, player1] = await ethers.getSigners();
 
             // Add a property
-            await Metropolis.addProperty("Mediterranean Avenue", 60, 2);
+            await Metropolis.addProperty("Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
 
             // Mint insufficient Monopoly money to player1
             await Metropolis.mintMonopolyMoney(player1.address, 50);
@@ -86,7 +87,7 @@ describe("Metropolis", function () {
 
         it("should allow the minter to mint Monopoly money", async function () {
             const { Metropolis } = await setup();
-            const [owner, player1] = await ethers.getSigners();
+            const [, player1] = await ethers.getSigners();
 
             // Mint 1000 Monopoly money to player1
             await Metropolis.mintMonopolyMoney(player1.address, 1000);
@@ -101,6 +102,52 @@ describe("Metropolis", function () {
             // Try to mint Monopoly money from player2 (non-minter)
             await expect(Metropolis.connect(player2).mintMonopolyMoney(player2.address, 1000))
                 .to.be.revertedWith("Metropolis: must have minter role to mint");
+        });
+    });
+
+    describe("Updating Property", function () {
+        it("should allow the owner to update a property", async function () {
+            const { Metropolis } = await setup();
+        
+            // Add a property with rent levels
+            await Metropolis.addProperty("Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]); 
+        
+            // Update the property with new rent levels
+            await Metropolis.updateProperty(1, "Updated Name", 100, [5, 25, 75, 225, 400, 625]); 
+        
+            const property = await Metropolis.properties(1);
+            expect(property.name).to.equal("Updated Name");
+            expect(property.price).to.equal(100);
+        
+            // Check the updated rent levels
+            expect(await Metropolis.getRent(1, 0)).to.equal(5); 
+            expect(await Metropolis.getRent(1, 1)).to.equal(25);
+            expect(await Metropolis.getRent(1, 2)).to.equal(75);
+            expect(await Metropolis.getRent(1, 3)).to.equal(225);
+            expect(await Metropolis.getRent(1, 4)).to.equal(400);
+            expect(await Metropolis.getRent(1, 5)).to.equal(625);
+        });
+
+        
+        it("should prevent non-owners from updating a property", async function () {
+            const { Metropolis } = await setup();
+            const [, player1] = await ethers.getSigners();
+
+            // Add a property
+            await Metropolis.addProperty("Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
+
+            // Try to update the property from a non-owner account
+            await expect(Metropolis.connect(player1).updateProperty(1, "Updated Name", 100, [5, 25, 75, 225, 400, 625]))
+                .to.be.revertedWithCustomError(Metropolis, "OwnableUnauthorizedAccount")  // Updated 
+                .withArgs(player1.address); // Add expected arguments for the custom error
+        });
+
+        it("should prevent updating a non-existent property", async function () {
+            const { Metropolis } = await setup();
+
+            // Try to update a non-existent property (ID 10)
+            await expect(Metropolis.updateProperty(10, "Updated Name", 100, [5, 25, 75, 225, 400, 625]))
+                .to.be.revertedWith("Property does not exist");
         });
     });
 
