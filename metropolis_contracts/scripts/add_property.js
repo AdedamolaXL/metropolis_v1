@@ -2,9 +2,7 @@
 const hre = require("hardhat");
 const { deployments, getNamedAccounts } = hre;
 const { ethers_hardhat } = require('hardhat');
-const ethers = require("ethers");
-const { BN } = require('@openzeppelin/test-helpers');
-import { func } from '../deploy/00_deploy_your_contract.ts';
+import { ethers } from "hardhat";
 const timers = require('timers-promises')
 import fs from 'fs';
 
@@ -34,7 +32,7 @@ async function main() {
   const providerAddress = hre.network.config.url
   const provider = new ethers.JsonRpcProvider(providerAddress);;
 
-  if (hre.network.name == 'hardhat') {
+  if (hre.network.name == 'localhost') {
     // const TOKEN_proxyFactory = await ethers.getContractFactory("NVMToken");
     // token_contract = await upgrades.deployProxy(TOKEN_proxyFactory, ['300000000000000000000000000'], { initializer: "__initializeNVM" });
     token_contract = await ethers.getContract("Metropolis");
@@ -50,34 +48,60 @@ async function main() {
   }
   console.log("token_contract address: ", token_contract.target)
 
-/*
-  for (const whitelistAddress of whitelistAddresses) {
-    console.log(`Whitelisting address: ${whitelistAddress}`);
-    const txResult = await token_contract.grantRole(FEE_EXCLUDED_ROLE, whitelistAddress);
-    console.log("waiting for transaction to complete", txResult)
-    await waitUntilTransactionMined(txResult.hash, provider)
-    await timers.setTimeout(5000);
-    console.log("has whitelist role: ", await token_contract.hasRole(FEE_EXCLUDED_ROLE, whitelistAddress));
-  }
-*/
-  const gameBlocks = JSON.parse(fs.readFileSync('../../backend/shared/data/gameBlocks.json', 'utf8'));
+  const gameBlocks = JSON.parse(fs.readFileSync('../backend/shared/data/gameBlocks.json', 'utf8'));
+  let counter = 0;
 
   // Add properties from JSON data
   for (const block of gameBlocks) {
     if (block.type === 'AVENUE' || block.type === 'RAILROAD' || block.type === 'ELECTRIC' || block.type === 'WATER') {
-      await monopolyGameFactory.addProperty(
-        block.name,
-        block.price,
-        [block.baserent, block.rent1, block.rent2, block.rent3, block.rent4, block.rent5],
-      );
+      
+
+      // Check if property already exists on the contract
+      const propertyExists = await checkPropertyExists(token_contract, block.name);
+
+      if (propertyExists) {
+        console.log(`Property ${block.name} already exists on the contract. Skipping...`);
+        continue;
+      }
+
+      try {
+        if (counter >= 3) {
+          console.log(`Simulating a fail for property ${block.name}`);
+          throw new Error("Simulated transaction failure");
+        }
+        const txResult = await token_contract.addProperty(
+          block.name,
+          block.price,
+          block.baserent ? [block.baserent, block.rent1, block.rent2, block.rent3, block.rent4, block.rent5] : [] ,
+        );
+        console.log("waiting for transaction to complete", txResult)
+        await waitUntilTransactionMined(txResult.hash, provider)
+        await timers.setTimeout(1000);
+      } catch (error) {
+        console.error(`Error adding property ${block.name}:`, error);
+      }
     }
   }
 
+}
 
+async function checkPropertyExists(contract, propertyName) {
+  try {
+    // Get all properties from the contract
+    const allProperties = await contract.getAllProperties();
 
+    // Check if a property with the given name exists
+    for (const property of allProperties) {
+      if (property.name === propertyName) {
+        return true; // Property exists
+      }
+    }
 
-
-
+    return false; // Property does not exist
+  } catch (error) {
+    console.error("Error checking property existence:", error);
+    throw error; // Re-throw the error 
+  }
 }
 
 function checkTransactionStatus(transactionHash, provider) {

@@ -151,5 +151,46 @@ describe("Metropolis", function () {
         });
     });
 
+    describe("Getting Properties", function () {
+        it("should get an individual property by ID", async function () {
+            const { Metropolis } = await setup();
+
+            // Add some properties
+            await Metropolis.addProperty("Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
+            await Metropolis.addProperty("Baltic Avenue", 60, [4, 20, 60, 180, 320, 450]);
+
+            // Get property with ID 1
+            const property = await Metropolis.getProperty(1);
+
+            expect(property.name).to.equal("Mediterranean Avenue");
+            expect(property.price).to.equal(60);
+            expect(property.rentLevels).to.deep.equal([2, 10, 30, 90, 160, 250]);
+        });
+
+        it("should revert when getting a non-existent property", async function () {
+            const { Metropolis } = await setup();
+
+            // Try to get a non-existent property (ID 5)
+            await expect(Metropolis.getProperty(5)).to.be.revertedWith("Property does not exist");
+        });
+
+        it("should get all properties", async function () {
+            const { Metropolis } = await setup();
+
+            // Add some properties
+            await Metropolis.addProperty("Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
+            await Metropolis.addProperty("Baltic Avenue", 60, [4, 20, 60, 180, 320, 450]);
+            await Metropolis.addProperty("Oriental Avenue", 100, [6, 30, 90, 270, 400, 550]);
+
+            // Get all properties
+            const properties = await Metropolis.getAllProperties();
+
+            expect(properties.length).to.equal(3);
+            expect(properties[0].name).to.equal("Mediterranean Avenue");
+            expect(properties[1].name).to.equal("Baltic Avenue");
+            expect(properties[2].name).to.equal("Oriental Avenue");
+        });
+    });
+
    
 });
