@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../../assets/logo.png';
+import metropolis from '../../assets/metropolis.png'
 import { COLORS } from '../../../backend/shared/constants';
 import { showToast } from '../../utilities';
 import { GameState, ServerPlayerData } from '../../../backend/shared/types'; // Use ServerPlayerData
@@ -52,7 +52,7 @@ const StartScreen: React.FC = () => {
   return (
     <div className="start-screen">
       <div className="game-logo">
-        <img src={logo} alt="Game Logo" />
+        <img src={metropolis} alt="Game Logo" />
       </div>
       <div className="game-form">
         <h2>Join Monopoly Game</h2>

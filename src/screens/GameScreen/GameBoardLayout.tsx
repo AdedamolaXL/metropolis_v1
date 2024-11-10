@@ -7,13 +7,9 @@ import data from '../../../backend/shared/data/gameBlocks.json'
 import { BOX_TYPES, SquareType } from '../../../backend/shared/constants';
 import DiceControls from './DiceControl';
 
-
 interface GameBoardLayoutProps {
   onTileClick: (getTileData: GameBoardSpace) => void;
 } 
-
-
-
 
 const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({ 
   onTileClick,
@@ -22,54 +18,24 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
   const [players, setPlayers] = useState(monopolyInstance.players.getArray());
   const [positions, setPositions] = useState<Record<string, number>>({});
 
-
-
-  console.log("Board Data:", boardData);
-  console.log("Players:", monopolyInstance.players.getArray());
-  console.log("Positions:", monopolyInstance.playerPositions);
   console.log(monopolyInstance)
 
   
 
   useEffect(() => {
-    // Load the board data from Monopoly instance and subscribe to changes
     setBoardData(monopolyInstance.boardData);
-
-    // console.log("Board Data:", monopolyInstance.boardData);
-
 
     const unsubscribe = monopolyInstance.subscribe(() => {
       setPlayers(monopolyInstance.players.getArray());
       setPositions(monopolyInstance.playerPositions);
     });
 
-    
-    
-
-    // monopolyInstance.socket.on('diceRolled', ({ playerName, currentIndex }) => {
-    //   setPositions((prevPositions) => ({
-    //     ...prevPositions,
-    //     [playerName]: currentIndex
-    //   }));
-    // });
-
-    
-
     return () => {
       unsubscribe();
-      monopolyInstance.socket.off('diceRolled');
     }
   }, []);
 
-
- 
- 
-
-
-
-
   const getTileData = (tileData: any): GameBoardSpace => {
-    // map type to specific value in GameBoardSpace
     const boxType = getBoxType(tileData);
 
     const propertyData = tileData.propertyData || {
@@ -95,17 +61,15 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
 
 
   // Helper functions to get board sides
-  const getBottomSquare = () => data.slice(1, 10).reverse();
-  const getLeftSquare = () => data.slice(11, 20).reverse();
+  const getBottomSquare = () => data.slice(1, 10);
+  const getLeftSquare = () => data.slice(11, 20);
   const getTopSquare = () => data.slice(21, 30);
   const getRightSquare = () => data.slice(31, 40);
 
-
-
-  const getGoCorner = () => data.slice(0, 1).reverse();
-  const getVisitingCorner = () => data.slice(10, 11).reverse();
-  const getParkingCorner = () => data.slice(20, 21).reverse();
-  const getJailCorner = () => data.slice(30, 31).reverse();
+  const getGoCorner = () => data.slice(0, 1);
+  const getVisitingCorner = () => data.slice(10, 11);
+  const getParkingCorner = () => data.slice(20, 21);
+  const getJailCorner = () => data.slice(30, 31);
 
   const getBoxType = (boxElement: any) => {
     const nameInLowerCase = boxElement.name.toLowerCase();
@@ -164,27 +128,22 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
     return null;
   };
 
-
-  
-
+  console.log(monopolyInstance.players.current()?.id)
 
   return (
     
-      <div className='table'>
+    <div className='table'>
        
       <div className='board'>
-
-      
       
         <div className='center'>
         
-          
-          {/* <div className='community-chest-deck'>
-            <h2 className='label'>Community Chest</h2>
-            <div className='deck'></div>
-          </div> */}
-        
           <h1 className='title'>METROPOLIS</h1>
+
+          <div className="community-chest-deck">
+						<h2 className="label">Community Chest</h2>
+						<div className="deck"></div>
+					</div>
 
           <div className='chance-deck'>
             <h2 className='label'>Chance</h2>
@@ -202,7 +161,7 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
               key={player.id}
             >
               <div className="player-name">{player.name}</div>
-              <div className="player-color">{player.color}</div>
+              <div className="player-marker" style={{ backgroundColor: player.color }}>{player.name[0]}</div>
               <div className="player-balance">Balance: ${player.balance}</div>
               {monopolyInstance.players.current()?.id === player.id && (
                   <div className="current-turn-indicator">Current Turn</div>
@@ -211,23 +170,16 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
             ))}
           </div>
 
-
           <DiceControls />
-         
-          
-
 
         </div>
         
-        
-        
         <div className='space corner go'>
-          {getGoCorner().map((tile, index) => {
-            
+          {getGoCorner().map((tile) => {  
             return (
               <GameBox
-                id={0}
-                key={index}
+                id={tile.index}
+                key={tile.index}
                 square={SquareType.CORNER_SQUARE}
                 tileData={getTileData(tile)}
                 players={players}
@@ -239,32 +191,33 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
           })}
         </div>
 
-
         <div className='row horizontal-row bottom-row'>
-        {getBottomSquare().map((tile, index) => {
-        
-            return (
-              <GameBox
-                id={index + 1}
-                key={index}
-                square={SquareType.HORIZONTAL_SQUARE}
-                tileData={getTileData(tile)}
-                players={players}
-                playerPositions={positions}
-                onClick={() => onTileClick(getTileData(tile))}
-                {...tile}
-              />
-            );
+          {getBottomSquare()
+          .slice()  // Create a shallow copy to avoid modifying the original array
+          .reverse()  // Reverse just for display purposes
+          .map((tile) => {
+          return (
+            <GameBox
+              id={tile.index}  // Use tile's own index for accurate positioning
+              key={tile.index}
+              square={SquareType.HORIZONTAL_SQUARE}
+              tileData={getTileData(tile)}
+              players={players}
+              playerPositions={positions}
+              onClick={() => onTileClick(getTileData(tile))}
+              {...tile}
+            />
+          );
           })}
         </div>
 
 
         <div className='space corner jail'>
-        {getVisitingCorner().map((tile, index) => {
+        {getVisitingCorner().map((tile) => {
             return (
               <GameBox
-                id={10}
-                key={index}
+                id={tile.index}
+                key={tile.index}
                 square={SquareType.CORNER_SQUARE}
                 tileData={getTileData(tile)}
                 players={players}
@@ -275,32 +228,37 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
             );
           })}
         </div>
-
 
         <div className='row vertical-row left-row'>
-        {getLeftSquare().map((tile, index) => {
-            return (
-              <GameBox
-                id={index + 11}
-                key={index}
-                square={SquareType.VERTICAL_SQUARE}
-                tileData={getTileData(tile)}
-                players={players}
-                playerPositions={positions}
-                onClick={() => onTileClick(getTileData(tile))}
-                {...tile}
-              />
-            );
+          {getLeftSquare()
+          .slice()  
+          .reverse()  
+          .map((tile) => {
+            const adjustedPositions: Record<string, number> = Object.keys(positions).reduce((acc, playerId) => {
+              acc[playerId] = positions[playerId] + 1;
+              return acc;
+            }, {} as Record<string, number>);
+          return (
+            <GameBox
+              id={tile.index}  
+              key={tile.index}
+              square={SquareType.VERTICAL_SQUARE}
+              tileData={getTileData(tile)}
+              players={players}
+              playerPositions={adjustedPositions}
+              onClick={() => onTileClick(getTileData(tile))}
+              {...tile}
+            />
+          );
           })}
         </div>
-
 
         <div className='space corner free-parking'>
-        {getParkingCorner().map((tile, index) => {
+        {getParkingCorner().map((tile) => {
             return (
               <GameBox
-                id={20}
-                key={index}
+                id={tile.index}
+                key={tile.index}
                 square={SquareType.CORNER_SQUARE}
                 tileData={getTileData(tile)}
                 players={players}
@@ -311,32 +269,30 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
             );
           })}
         </div>
-
 
         <div className='row horizontal-row top-row'>
-        {getTopSquare().map((tile, index) => {
-            return (
-              <GameBox
-                id={index + 21}
-                key={index}
-                square={SquareType.CORNER_SQUARE}
-                tileData={getTileData(tile)}
-                players={players}
-                playerPositions={positions}
-                onClick={() => onTileClick(getTileData(tile))}
-                {...tile}
-              />
-            );
+          {getTopSquare().map((tile) => {
+          return (
+            <GameBox
+              id={tile.index} 
+              key={tile.index}
+              square={SquareType.HORIZONTAL_SQUARE}
+              tileData={getTileData(tile)}
+              players={players}
+              playerPositions={positions}
+              onClick={() => onTileClick(getTileData(tile))}
+              {...tile}
+            />
+          );
           })}
         </div>
-
 
         <div className='space corner go-to-jail'>
-        {getJailCorner().map((tile, index) => {
+        {getJailCorner().map((tile) => {
             return (
               <GameBox
-                id={30}
-                key={index}
+                id={tile.index}
+                key={tile.index}
                 square={SquareType.CORNER_SQUARE}
                 tileData={getTileData(tile)}
                 players={players}
@@ -348,27 +304,30 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
           })}
         </div>
 
-
         <div className='row vertical-row right-row'>
-        {getRightSquare().map((tile, index) => {
-            return (
-              <GameBox
-                id={index + 31}
-                key={index}
-                square={SquareType.VERTICAL_SQUARE}
-                tileData={getTileData(tile)}
-                players={players}
-                playerPositions={positions}
-                onClick={() => onTileClick(getTileData(tile))}
-                {...tile}
-              />
-            );
+          {getRightSquare().map((tile) => {
+            // adjust player position
+            const adjustedPositions: Record<string, number> = Object.keys(positions).reduce((acc, playerId) => {
+              acc[playerId] = positions[playerId] - 1;
+              return acc;
+            }, {} as Record<string, number>);
+          return (
+            <GameBox
+              id={tile.index}  
+              key={tile.index}
+              square={SquareType.VERTICAL_SQUARE}
+              tileData={getTileData(tile)}
+              players={players}
+              playerPositions={adjustedPositions}
+              onClick={() => onTileClick(getTileData(tile))} // Use tile's own index for accurate positioning
+              {...tile}
+            />
+          );
           })}
         </div>
 
-
       </div>
-      </div>
+    </div>
     
   );
 };

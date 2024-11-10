@@ -442,7 +442,7 @@
    margin: 50px auto;
    width: 994px;
    height: 994px;
-   background: #080808;
+   background: #141414;
    border: 2px solid #080808; }
  
  .center {
@@ -463,8 +463,8 @@
    letter-spacing: 12px; }
  
  .community-chest-deck {
-   grid-column: 2 / 4;
-   grid-row: 2 / 4;
+   grid-column: 0 / 7;
+   grid-row: 6 / 7;
    transform: rotate(135deg);
    margin-bottom: 60px;
    margin-right: 60px; }
@@ -488,29 +488,41 @@
    height: 120px; }
  
  .row {
-   display: grid;
-   grid-gap: 2px; }
+   display: flex;
+   grid-gap: 2px; 
+  }
  
  .horizontal-row {
    grid-template-columns: repeat(9, 80px);
    grid-template-rows: 125px; }
  
  .vertical-row {
-   grid-template-columns: 125px;
-   grid-template-rows: repeat(9, 80px); }
+   grid-template-columns: 124px;
+   grid-template-rows: repeat(9, minmax(0, 1fr));
+   display: grid
+  }
    .vertical-row .container {
      top: 50%;
-     left: 50%; }
+     left: 50%;
+    }
+
+    /* .vertical-row .container > div {
+      background-color: #8ca0ff;
+      padding: 5px;
+    } */
  
  .bottom-row {
    grid-column: 2 / 11;
    grid-row: 11; }
  
  .left-row {
-   grid-column: 1;
-   grid-row: 2 / 11; }
+   grid-column: 1 ;
+   grid-row: 2 / 11;
+   
+  }
    .left-row .container {
-     transform: translate(-50%, -17%) rotate(90deg); }
+     transform: translate(-50%, -18%) rotate(90deg); 
+    }
  
  .top-row {
    grid-column: 2 / 11;
@@ -520,12 +532,19 @@
  
  .right-row {
    grid-column: 11;
-   grid-row: 2 / 11; }
+   grid-row: 2 / 11;
+  }
    .right-row .container {
-     transform: translate(-50%, -20%) rotate(270deg); }
+     transform: translate(-50%, -18%) rotate(270deg); }
+
+     .vertical-row .player-marker {
+      position: absolute;
+      z-index: 10; 
+    }
+
  
  .space {
-   background: #fafaf8;
+   background: #f8f8f6;
    text-align: center; }
    .space .container {
      display: flex;
@@ -543,6 +562,7 @@
      font-size: 7px;
      font-weight: 400;
      padding-bottom: 5px; }
+     
  
  .corner .container {
    justify-content: space-around;
@@ -556,6 +576,7 @@
    border-bottom: 2px solid #080808; }
  .property .name {
    padding-bottom: 50px; }
+ 
  
  .railroad .name {
    padding-top: 10px; }
@@ -605,7 +626,7 @@
      grid-column: 4 / 11;
      grid-row: 1 / 8;
      width: 87.5px;
-     height: 107.5px;
+     height: 93.5px;
      background: #fa811d;
      border-bottom: 2px solid #080808;
      border-left: 2px solid #080808; }

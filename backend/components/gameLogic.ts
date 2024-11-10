@@ -315,6 +315,7 @@ getGameState(): GameState {
     const nextPlayer = this.players.next();
   
     if (previousPlayer && nextPlayer) {
+      console.log(`Switching turn from ${previousPlayer.name} to ${nextPlayer.name}`);
       // Notify clients about the turn change
       this.onPlayerChange(() => this.getGameState());
     }

@@ -3,14 +3,13 @@ import { monopolyInstance } from '../../models/Monopoly';
 import { Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from 'lucide-react';
 
 const DiceControl = () => {
-  const [diceValues, setDiceValues] = useState<[number, number]>([1, 1]); // Initial dice values
+  const [diceValues, setDiceValues] = useState<[number, number]>([1, 1]);
+  const [isCurrentPlayerTurn, setIsCurrentPlayerTurn] = useState<boolean>(false);
 
   useEffect(() => {
-    // Listen for the server's dice roll result
     const handleDiceRolled = ({ roll, currentIndex }: { roll: number, currentIndex: number }) => {
-      // Update dice values directly from server's roll result
-      let dieOne = Math.floor(Math.random() * (roll - 1)) + 1; // Random value for the first die
-      let dieTwo = roll - dieOne; // The second die is the difference to make the total sum
+      let dieOne = Math.floor(Math.random() * (roll - 1)) + 1;
+      let dieTwo = roll - dieOne;
 
       if (dieTwo < 1 || dieTwo > 6) {
         dieOne = Math.floor(Math.random() * (roll - 1)) + 1;
@@ -18,25 +17,34 @@ const DiceControl = () => {
       }
       
       setDiceValues([dieOne, dieTwo]);
-      console.log(dieOne, dieTwo)
-      console.log(roll, currentIndex)
+      console.log(dieOne, dieTwo);
+      console.log(roll, currentIndex);
     };
 
     // Subscribe to 'diceRolled' event from the server
     monopolyInstance.socket.on('diceRolled', handleDiceRolled);
 
-    // Cleanup listener on component unmount
+    // Subscribe to 'turnChanged' event to check if it's the player's turn
+    monopolyInstance.socket.on('turnChanged', (nextPlayerId: string) => {
+      const currentPlayer = monopolyInstance.currentPlayer;
+      setIsCurrentPlayerTurn(currentPlayer?.id === nextPlayerId);
+      console.log('Turn changed:', nextPlayerId);
+    });
+
     return () => {
       monopolyInstance.socket.off('diceRolled', handleDiceRolled);
     };
   }, []);
 
   const handleRollDice = () => {
-    // Emit roll dice request to server, which will respond with diceRolled
-    monopolyInstance.rollDice();
+    if (isCurrentPlayerTurn) {
+      console.log("It's not your turn!");
+    }
+    console.log("Rolling the dice...");
+    monopolyInstance.rollDice(); // Proceed to roll dice
   };
 
-  
+
 
   const getDiceIcon = (value: number, size: number = 24) => {
     switch (value) {
@@ -52,22 +60,22 @@ const DiceControl = () => {
 
   const total = diceValues[0] + diceValues[1];
 
+
   return (
     <div className="dice-control">
-    <div className="dice">
-      <div className="die">
-        {getDiceIcon(diceValues[0], 48)} {/* Render the first die */}
+      <div className="dice">
+        <div className="die">
+          {getDiceIcon(diceValues[0], 48)} {/* Render the first die */}
+        </div>
+        <div className="die">
+          {getDiceIcon(diceValues[1], 48)} {/* Render the second die */}
+        </div>
       </div>
-      <div className="die">
-        {getDiceIcon(diceValues[1], 48)} {/* Render the second die */}
-      </div>
-    </div>
-    <div className="dice-total">
+      <div className="dice-total">
         <span>Total: {total}</span> {/* Render the total */}
       </div>
-    <button onClick={handleRollDice}>Roll Dice</button>
-   
-  </div>
+      <button onClick={handleRollDice} >Roll Dice</button>
+    </div>
   );
 };
 

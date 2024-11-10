@@ -23,7 +23,17 @@ class Monopoly {
   private subscribers: (() => void)[] = [];
   public playerPositions: Record<string, number> = {};
   public properties: Property[];
-  public lastDiceValue: number = 0;
+  
+  // public get lastDiceValue(): number {
+  //   return this.gameState.currentPlayer?.lastDiceValue ?? 0;
+  // }
+  
+  // public get currentPlayerName(): string {
+  //   return this.gameState.currentPlayer?.name;
+  // }
+
+  private _currentPlayerId: string | null = null;
+  
 
   constructor() {
     this.socket = io('http://localhost:4000', {
@@ -62,59 +72,111 @@ class Monopoly {
   
 
   private setupSocketListeners() {
+    
     this.socket.on('gameState', (state: GameState) => {
+      console.log('Received new game state:', state);
+      
+      // First update the local game state
       this.gameState = {
         ...state,
         players: state.players.map(player => this.convertToClientPlayerData(player))
       };
+
+      this._currentPlayerId = this.gameState.currentPlayer?.id || null;
+      
+      // Then update players
       this.updatePlayers(this.gameState.players as ClientPlayerData[]);
+      
+       // Synchronize the cycled array with current player
+       if (this._currentPlayerId) {
+        const currentPlayerIndex = this.players.getArray().findIndex(
+          player => player.id === this._currentPlayerId
+        );
+        if (currentPlayerIndex !== -1) {
+          this.players.index = currentPlayerIndex;
+        }
+      }
+
+      // Verify synchronization
+      const syncCheck = {
+        gameStatePlayer: this.gameState.currentPlayer?.name,
+        currentPlayer: this.currentPlayer?.name,
+        currentPlayerId: this._currentPlayerId
+      };
+      console.log('Synchronization check:', syncCheck);
+      
+      this.notifySubscribers();
     });
 
     this.socket.on('gameBoardData', (data: GameBoardSpace[]) => {
       this.boardData = data;  
       console.log("Board Data updated:", this.boardData);
+      this.notifySubscribers();
     });
 
-    this.socket.on('gameState', (gameState) => {
-      console.log('Game state updated:', gameState);
+    // Update properties
+    this.socket.on('updateProperties', (properties: Property[]) => {
+      this.properties = properties;
+      console.log('Updated properties:', this.properties);
+      this.notifySubscribers();
     });
 
-    this.socket.on('updateProperties', (properties) => {
-      console.log('Updated properties:', properties);
+      this.socket.on('updatePlayers', (players: ServerPlayerData[]) => {
+      const updatedPlayers = players.map(this.convertToClientPlayerData);
+      this.updatePlayers(updatedPlayers);
+      console.log('Updated players:', updatedPlayers);
+      console.log('Updated playerPositions:', this.playerPositions);
+      this.notifySubscribers();
     });
-    
-    this.socket.on('updatePlayers', (players) => {
-      console.log('Updated players:', players);
-    });
-    
-    this.socket.on('gameState', (gameState) => {
-      console.log('Updated game state:', gameState);
-    });
-    
-    
 
-    // this.socket.on('diceRolled', ({ playerName, roll, currentIndex }) => {
-    //   const currentPlayer = this.players.find(player => player.name === playerName);
-    
-    //   if (currentPlayer) {
-    //     // Update the local game state
-    //     currentPlayer.lastDiceValue = roll;
-    //     currentPlayer.currentIndex = currentIndex;
-    
-    //     // Emit an event to update the dice values in the UI
-    //     this.emitDiceRoll(Math.floor(roll / 2), roll % 6 || 6);
-    
-    //     // Emit the updated player position
-    //     this.emitPlayerPosition(currentPlayer.id, currentIndex);
-    //   }
+    // this.socket.on('gameState', (gameState) => {
+    //   console.log('Updated game state:', gameState);
+    //   console.log("Checking if it's the correct player's turn...");
+    // console.log("Current Player:", this.gameState.currentPlayer?.name);
+    // console.log("Attempting Player:", this.currentPlayer?.name);
+
+    // if (this.gameState.currentPlayer?.name !== this.currentPlayer?.name) {
+    //   console.log("It's not your turn!");
+    //   return;
+    // }
+
+    // console.log("It's your turn, proceed with action...");
     // });
+
+    this.socket.on('gameState', (state: GameState) => {
+      const updatedPlayers = state.players.map(player => this.convertToClientPlayerData(player));
+      this.gameState = {
+        ...state,
+        players: updatedPlayers
+      };
+      this.updatePlayers(updatedPlayers);
+      this.notifySubscribers();
+    });
+    
     
 
-    // this.socket.on('rejoinGame', (player: ServerPlayerData) => {
-    //   this.addLog(`${player.name} has rejoined the game`);
-    //   this.players.add(this.convertToClientPlayerData(player));
-    //   this.gameState = { ...this.gameState, players: this.players.getArray()}
-    // })
+    this.socket.on('diceRolled', ({ playerName, roll, currentIndex }) => {
+      const currentPlayer = this.players.find(player => player.name === playerName);
+      if (currentPlayer) {
+        currentPlayer.lastDiceValue = roll;
+        currentPlayer.currentIndex = currentIndex;
+        
+        this.playerPositions[currentPlayer.id] = currentIndex;
+        console.log("Dice rolled:", roll, "Current index:", currentIndex);
+        console.log("Updated playerPositions:", this.playerPositions);
+        this.notifySubscribers();
+      }
+    });
+
+    // Listen for turn changes from the server
+    this.socket.on('turnChanged', (nextPlayerId: string) => {
+      console.log('Turn changed event received for player:', nextPlayerId);
+      this._currentPlayerId = nextPlayerId;
+      this.setNextPlayer(nextPlayerId);
+      this.addLog(`It's now ${this.currentPlayer?.name}'s turn.`);
+      this.notifySubscribers();
+    });
+
 
      // Error handling for socket events
      this.socket.on('connect_error', (error) => {
@@ -129,14 +191,6 @@ class Monopoly {
 
   }
 
- 
-  // private emitDiceRoll(dieOne: number, dieTwo: number) {
-  //   // Emit to React component via socket or some other event system
-  //   this.lastDiceValue = dieOne + dieTwo;
-  //   this.socket.emit('updateDiceValues', { dieOne, dieTwo });
-  //   this.notifySubscribers();
-  // }
-
   public subscribe(callback: () => void): () => void {
     this.subscribers.push(callback);
     return () => {
@@ -148,8 +202,6 @@ class Monopoly {
     this.subscribers.forEach(callback => callback());
   }
 
-
-
   private convertToClientPlayerData(player: ServerPlayerData): ClientPlayerData {
     return {
       ...player,
@@ -160,62 +212,121 @@ class Monopoly {
       ownedProperties: player.ownedProperties
     }
   }
-  private updatePlayers(players: ClientPlayerData[]): void {
-    this.players = new Cycled<ClientPlayerData>(players); // Specify type argument here
+  private updatePlayerPositions(players: ClientPlayerData[]) {
+    // Clear existing positions
+    this.playerPositions = {};
+    
+    // Map using player names instead of IDs
+    players.forEach(player => {
+      if (player.name) {
+        this.playerPositions[player.name] = player.currentIndex;
+      }
+    });
+    console.log('Updated playerPositions:', this.playerPositions);
   }
+
+  private updatePlayers(players: ClientPlayerData[]): void {
+    console.log('Updating players:', players);
+    this.players = new Cycled<ClientPlayerData>(players);
+    this.updatePlayerPositions(players);
+    
+    // Maintain current player synchronization
+    if (this._currentPlayerId) {
+      const currentPlayerIndex = players.findIndex(
+        player => player.id === this._currentPlayerId
+      );
+      if (currentPlayerIndex !== -1) {
+        this.players.index = currentPlayerIndex;
+      }
+    }
+  }
+
   
  // Updated joinGame to send both name and color as the server expects
- public joinGame(name: string, color: string, walletAddress: string): void {
+//  public joinGame(name: string, color: string, walletAddress: string): void {
+//   this.socket.emit('joinGame', { name, color, walletAddress });
+
+//   this.socket.on('gameBoardData', (data: GameBoardSpace[]) => {
+//     this.boardData = data;
+//     this.playerPositions = {}; // Initialize player positions
+//   });
+
+//   this.socket.on('gameState', (state: GameState) => {
+//     this.gameState = {
+//       ...state,
+//       players: state.players.map(player => this.convertToClientPlayerData(player)),
+//     };
+//     this.updatePlayers(this.gameState.players as ClientPlayerData[]);
+//     this.playerPositions = {}; // Initialize player positions
+//     state.players.forEach((player, index) => {
+//       this.playerPositions[player.id] = player.currentIndex;
+//     });
+//   });
+
+//   this.socket.on('error', (message: string) => {
+//     console.error(`Error: ${message}`);
+//     this.addLog(`Error: ${message}`);
+//   });
+// }
+
+
+public joinGame(name: string, color: string, walletAddress: string): void {
   this.socket.emit('joinGame', { name, color, walletAddress });
-
-  this.socket.on('gameBoardData', (data: GameBoardSpace[]) => {
-    this.boardData = data;
-    this.playerPositions = {}; // Initialize player positions
-  });
-
+  
   this.socket.on('gameState', (state: GameState) => {
+    const updatedPlayers = state.players.map(player => this.convertToClientPlayerData(player));
     this.gameState = {
       ...state,
-      players: state.players.map(player => this.convertToClientPlayerData(player)),
+      players: updatedPlayers,
     };
-    this.updatePlayers(this.gameState.players as ClientPlayerData[]);
-    this.playerPositions = {}; // Initialize player positions
-    state.players.forEach((player, index) => {
-      this.playerPositions[player.id] = player.currentIndex;
-    });
-  });
-
-
-  this.socket.on('error', (message: string) => {
-    console.error(`Error: ${message}`);
-    this.addLog(`Error: ${message}`);
+    this.updatePlayers(updatedPlayers);
+    this.notifySubscribers();
   });
 }
 
+
+
+
 public rollDice(): void {
-  const currentPlayer = this.players.current();
-  if (!currentPlayer) return;
+  // Get current state snapshot
+  const stateSnapshot = {
+    gameStatePlayer: this.gameState.currentPlayer,
+    currentPlayer: this.currentPlayer,
+    currentPlayerId: this._currentPlayerId
+  };
+  
+  console.log('State snapshot before roll:', stateSnapshot);
 
+  const currentPlayer = this.currentPlayer;
+  if (!currentPlayer) {
+    console.log('No current player found');
+    return;
+  }
+
+  // Check if it's the player's turn using currentPlayerId
+  if (this._currentPlayerId !== currentPlayer.id) {
+    console.log('Turn validation failed:');
+    console.log('Expected player ID:', this._currentPlayerId);
+    console.log('Attempting player ID:', currentPlayer.id);
+    console.log('Expected player name:', this.gameState.currentPlayer?.name);
+    console.log('Attempting player name:', currentPlayer.name);
+    return;
+  }
+
+  console.log('Rolling dice for player:', currentPlayer.name);
   this.socket.emit('rollDice');
-
+  
   this.socket.once('diceRolled', ({ playerName, roll, currentIndex }) => {
+    console.log('Dice rolled event received:', { playerName, roll, currentIndex });
     if (playerName === currentPlayer.name) {
-      // Update the local game state
-
-      
-
-      
-
-     
-      this.emitPlayerPosition(currentPlayer.name, currentIndex);
-      this.toggleCurrentTurn();
-
-      console.log("lastDiceValue:", currentPlayer.lastDiceValue, roll, currentPlayer.name, currentPlayer.currentIndex);
+      currentPlayer.lastDiceValue = roll;
+      currentPlayer.currentIndex = currentIndex;
+      this.emitPlayerPosition(currentPlayer.id, currentIndex);
+      console.log("Dice roll completed for player:", playerName, "Roll:", roll, "Position:", currentIndex);
+      this.notifySubscribers();
     }
   });
 }
-
-
 
   private emitGameState() {
     this.socket.emit('gameState', {
@@ -225,42 +336,40 @@ public rollDice(): void {
     });
   }
 
-  getGameState(): GameState {
-    return {
-      players: this.players.getArray().map(player => this.convertToClientPlayerData(player)),
-      properties: this.properties,
-      currentPlayer: this.players.current() ? this.convertToClientPlayerData(this.players.current()!) : null
-    };
-  }
+  // getGameState(): GameState {
+  //   return {
+  //     players: this.players.getArray().map(player => this.convertToClientPlayerData(player)),
+  //     properties: this.properties,
+  //     currentPlayer: this.players.current() ? this.convertToClientPlayerData(this.players.current()!) : null
+  //   };
+  // }
 
+  // private handleLandedSpace(player: ClientPlayerData, space: GameBoardSpace): void {
+  //   switch (space.type) {
+  //     case 'CHANCE':
+  //       this.addLog(`${player.name} landed on Chance`);
+  //       this.drawCard('CHANCE');
+  //       break;
+  //     case 'COMMUNITY':
+  //       this.addLog(`${player.name} landed on Community Chest`);
+  //       this.drawCard('COMMUNITY');
+  //       break;
+  //     case 'INCOME':
+  //       player.balance -= 200;
+  //       this.addLog(`${player.name} paid $200 income tax`);
+  //       break;
+  //     case 'LUXURY':
+  //       player.balance -= 100;
+  //       this.addLog(`${player.name} paid $100 luxury tax`);
+  //       break;
+  //     case 'JAIL':
+  //       this.addLog(`${player.name} is just visiting jail`);
+  //       break;
+  //     // Add more cases as needed
+  //   }
+  //   this.emitGameState();
+  // }
 
-
-
-  private handleLandedSpace(player: ClientPlayerData, space: GameBoardSpace): void {
-    switch (space.type) {
-      case 'CHANCE':
-        this.addLog(`${player.name} landed on Chance`);
-        this.drawCard('CHANCE');
-        break;
-      case 'COMMUNITY':
-        this.addLog(`${player.name} landed on Community Chest`);
-        this.drawCard('COMMUNITY');
-        break;
-      case 'INCOME':
-        player.balance -= 200;
-        this.addLog(`${player.name} paid $200 income tax`);
-        break;
-      case 'LUXURY':
-        player.balance -= 100;
-        this.addLog(`${player.name} paid $100 luxury tax`);
-        break;
-      case 'JAIL':
-        this.addLog(`${player.name} is just visiting jail`);
-        break;
-      // Add more cases as needed
-    }
-    this.emitGameState();
-  }
 
 
   public nextTurn(): void {
@@ -278,6 +387,24 @@ public rollDice(): void {
     }
   }
 
+  private setNextPlayer(nextPlayerId: string): void {
+    console.log('Setting next player:', nextPlayerId);
+    this._currentPlayerId = nextPlayerId;
+    
+    const nextPlayerIndex = this.players.indexOf(
+      this.players.find(player => player.id === nextPlayerId)!
+    );
+    
+    if (nextPlayerIndex >= 0) {
+      console.log('Found next player at index:', nextPlayerIndex);
+      this.players.index = nextPlayerIndex;
+      this.addLog(`Turn changed to ${this.players.current()?.name}`);
+      this.notifySubscribers();
+    } else {
+      console.log('Next player not found in players array');
+  }
+}
+
 
   public buyProperty(propertyId: number): void {
     this.socket.emit('buyProperty', propertyId);
@@ -293,56 +420,17 @@ public rollDice(): void {
     this.socket.emit('rentProperty', this.boardData.indexOf(property));
   }
 
-  // private handlePlayerTurn(): void {
-  //   const currentPlayer = this.players.current();
-  //   if (currentPlayer) {
-  //     // Calculate new position using lastDiceValue
-  //     const newPosition = currentPlayer.currentIndex + currentPlayer.lastDiceValue;
-
-  //     // Update the position, handling board wrap-around and Go bonus
-  //     if (newPosition >= 40) {
-  //       currentPlayer.currentIndex = newPosition - 40; // Wrap around the board
-  //       currentPlayer.balance += 200; // Collect $200 for passing Go
-  //       this.addLog(`${currentPlayer.name} passed Go and collected $200`);
-  //     } else {
-  //       currentPlayer.currentIndex = newPosition;
-  //     }
-
-  //     // Update players array and advance the turn
-  //     this.updatePlayers(this.players.getArray());
-  //     this.emitPlayerPosition(currentPlayer.id, currentPlayer.currentIndex);
-  //     this.toggleCurrentTurn(); // Move to next player
-  //   }
-  // }
-
   public get currentPlayer(): ClientPlayerData | null {
-    return this.players.current() ?? null;
+    if (!this._currentPlayerId) return null;
+    return this.players.find(player => player.id === this._currentPlayerId) || this.players.current() || null;
   }
-
   public emitPlayerPosition(playerId: string, position: number): void {
-    this.playerPositions[playerId] = position;
-    this.notifySubscribers();
-  }
-
-
-
- 
-  public removePlayer(playerId: string): void {
-    const playerToRemove = this.players.find(player => player.id === playerId);
-    if (playerToRemove) {
-      const removedPlayer = this.players.remove(playerToRemove);
-      if (removedPlayer) {
-        this.removedPlayers.push(removedPlayer);
-        this.addLog(`${removedPlayer.name} has been removed from the game.`);
-        this.socket.emit('gameState', { players: this.players.getArray(), logs: this.logs });
-      }
+    const player = this.players.find(p => p.id === playerId);
+    if (player && player.name) {
+      this.playerPositions[player.name] = position; // Use name instead of ID
+      this.notifySubscribers();
     }
-}
-
-  
-
-  
-
+  }
 
   public addLog(message: string) {
     this.logs.push(message);
@@ -353,10 +441,6 @@ public rollDice(): void {
     this.addLog('Turn changed to the next player');
   }
 }
-
-
-
-
 
 const monopolyInstance = new Monopoly();
 
