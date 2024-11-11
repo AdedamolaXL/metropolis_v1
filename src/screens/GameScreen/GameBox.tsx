@@ -3,7 +3,7 @@ import { GameBoardSpace, ClientPlayerData } from '../../../backend/shared/types'
 import { BOX_TYPES, SquareType } from '../../../backend/shared/constants';
 import './gameBoard.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faLongArrowLeft, faQuestion, faSubway, faFrown, faCube, faLightbulb, faTint, faDiamond } from '@fortawesome/free-solid-svg-icons'
+import { faLongArrowLeft, faQuestion, faSubway, faFrown, faCube, faLightbulb, faTint, faDiamond, faCar } from '@fortawesome/free-solid-svg-icons'
 
 interface GameBoxProps {
   square: SquareType;
@@ -128,7 +128,7 @@ const GameBox: React.FC<GameBoxProps> = ({ tileData, players, square, id, player
         case BOX_TYPES.VISITING:
           return (
             <>
-              {/* <div className='just'>Just</div> */}
+              
               <div className='drawing'>
                 <div className='container'>
                   <div className="name">In</div>
@@ -151,7 +151,9 @@ const GameBox: React.FC<GameBoxProps> = ({ tileData, players, square, id, player
         return (
           <div className='container'>
             <div className='name'>{name}
-            <i className='drawing fa fa-car'></i>
+            <i className=''>
+              <FontAwesomeIcon className='drawing' icon={faCar} />
+            </i>
             </div>
           </div>
         )

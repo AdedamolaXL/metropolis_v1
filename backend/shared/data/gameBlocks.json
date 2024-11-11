@@ -289,7 +289,7 @@
     "name": "Boulevard Malesherbes",
     "type": "AVENUE",
     "pricetext": "$220",
-    "color": "#FF0000",
+    "color": "red",
     "price": 220,
     "groupNumber": 7,
     "baserent": 18,

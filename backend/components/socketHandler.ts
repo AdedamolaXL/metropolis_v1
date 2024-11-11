@@ -40,12 +40,11 @@ export function setupSocketHandlers(io: Server) {
         const currentIndex = gameManager.handlePlayerTurn(player, diceRoll);
         io.emit('diceRolled', 
           {playerName: player.name, roll: diceRoll, currentIndex: currentIndex });
-        // Emit updated game state
-
-        // Trigger handlePlayerTurn to update player position and perform actions based on the new block
-        // gameManager.handlePlayerTurn(player, diceRoll);
 
        // Emit updated game state after handling the turn
+       io.emit('gameState', gameManager.getGameState());
+
+       gameManager.nextTurn();
        io.emit('gameState', gameManager.getGameState());
       }
     });
