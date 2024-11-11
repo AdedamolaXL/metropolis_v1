@@ -1,0 +1,18 @@
+[
+  { "id":"CH1", "text":  "GET OUT OF JAIL FREE. This card may be kept until needed or traded."},
+  { "id":"CH2", "text":  "Make General Repairs on All Your Property. For each house pay $25. For each hotel $100."},
+  { "id":"CH3", "text":  "You are assessed for street repairs. Pay $40 per house. Pay $115 per hotel."},
+  { "id":"CH4", "text":  "Go back three spaces."},
+  { "id":"CH5", "text":  "ADVANCE TO GO (Collect $200)"},
+  { "id":"CH6", "text":  "Bank pays you dividend of $50."},
+  { "id":"CH7", "text":  "ADVANCE to Christ Redeemer. If you pass Go. Collect $200."},
+  { "id":"CH8", "text":  "Pay poor tax of $15."},
+  { "id":"CH9", "text":  "Pay school tax of $150"},
+  { "id":"CH10", "text": "ADVANCE to Street of Peace."},
+  { "id":"CH11", "text": "ADVANCE to Henri Martin. If you pass 'GO' collect $200."},
+  { "id":"CH12", "text": "Your building loan matures. Collect $150."},
+  { "id":"CH13", "text": "ADVANCE TO Park of Lyon. If you pass 'GO' collect $200."},
+  { "id":"CH14", "text": "Amend for intoxication. Pay  $20."},
+  { "id":"CH15", "text": "Go to Jail. Go Directly to Jail. Do not pass 'GO'. Do not collect $200."},
+  { "id":"CH16", "text": "Xmas fund matures. Collect $10"}
+]
