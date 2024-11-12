@@ -41,7 +41,7 @@ export class GameManager {
         } as Property   // Default to null unless assigned a Property object
       })) as GameBoardSpace[];
 
-      console.log('Board Data:', JSON.stringify(boardData, null, 2));
+      // console.log('Board Data:', JSON.stringify(boardData, null, 2));
       return boardData;
       
     } catch (error) {
@@ -143,12 +143,27 @@ export class GameManager {
   }
 
  handlePlayerTurn(player: ServerPlayerData, diceRoll: number) {
+    // Clear the currentPlayer from the previous tile
+    this.boardData.forEach((tile) => {
+      if (tile.currentPlayer?.id && tile.currentPlayer.id === player.id) {
+        console.log(`Clearing currentPlayer on tile ${tile.index}`);  
+        tile.currentPlayer = null;
+      }
+    });
+    
     player.currentIndex = (player.currentIndex + diceRoll) % this.boardData.length;
     const currentBlock = this.boardData[player.currentIndex];
     console.log(player.currentIndex)
     console.log(`Board data length: ${this.boardData.length}`);
-    console.log(`Current block: ${player.name} is on ${currentBlock.name}`);
+    console.log(`Player ${player.name} moved to ${currentBlock.name} at index ${player.currentIndex}`);
+    // console.log(`Current block: ${JSON.stringify(currentBlock)}`);
 
+    // Set the currentPlayer on the new tile
+    currentBlock.currentPlayer = player;
+
+      // Log to verify if currentPlayer has been set
+      console.log(`Updated currentPlayer on tile ${player.currentIndex}:`, JSON.stringify(currentBlock));
+      // console.log('Final boardData state after turn:', JSON.stringify(this.boardData));
 
 
     switch (currentBlock.type) {

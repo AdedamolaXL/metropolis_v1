@@ -16,24 +16,28 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
   }) => {
   const [boardData, setBoardData] = useState<GameBoardSpace[]>([]);
   const [players, setPlayers] = useState(monopolyInstance.players.getArray());
-  const [positions, setPositions] = useState<Record<string, number>>({});
+  const [positions, setPositions] = useState<Record<string, number>>(monopolyInstance.playerPositions);
 
   console.log(monopolyInstance)
 
   
 
   useEffect(() => {
-    setBoardData(monopolyInstance.boardData);
+    setPositions(monopolyInstance.playerPositions);
 
     const unsubscribe = monopolyInstance.subscribe(() => {
       setPlayers(monopolyInstance.players.getArray());
-      setPositions(monopolyInstance.playerPositions);
+      
+      setPositions({ ...monopolyInstance.playerPositions });
+      setBoardData(monopolyInstance.boardData);
     });
 
     return () => {
       unsubscribe();
     }
   }, []);
+
+
 
   const getTileData = (tileData: any): GameBoardSpace => {
     const boxType = getBoxType(tileData);
@@ -128,7 +132,34 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
     return null;
   };
 
-  console.log(monopolyInstance.players.current()?.id)
+  const getAdjustedPositions = (section: 'left' | 'right' | 'top' | 'bottom' | 'corner', positions: Record<string, number>) => {
+    return Object.entries(positions).reduce((acc, [playerId, position]) => {
+      let adjustedPosition = position;
+
+      // Special handling for the corner positions (0, 10, 20, 30)
+      if (position === 0 || position === 10 || position === 20 || position === 30) {
+        adjustedPosition = position; // No adjustment needed for corners
+      } else {
+        // Adjust positions for different sides of the board
+        switch (section) {
+          case 'left':
+            adjustedPosition = position + 1;
+            break;
+          case 'right':
+            adjustedPosition = position - 1;
+            break;
+          // top and bottom don't need adjustment
+          default:
+            adjustedPosition = position;
+        }
+      }
+
+      return {
+        ...acc,
+        [playerId]: adjustedPosition
+      };
+    }, {} as Record<string, number>);
+  };
 
   return (
     
@@ -230,26 +261,20 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
         </div>
 
         <div className='row vertical-row left-row'>
-          {getLeftSquare()
-          .slice()  
-          .reverse()  
-          .map((tile) => {
-            const adjustedPositions: Record<string, number> = Object.keys(positions).reduce((acc, playerId) => {
-              acc[playerId] = positions[playerId] + 1;
-              return acc;
-            }, {} as Record<string, number>);
-          return (
-            <GameBox
-              id={tile.index}  
-              key={tile.index}
-              square={SquareType.VERTICAL_SQUARE}
-              tileData={getTileData(tile)}
-              players={players}
-              playerPositions={adjustedPositions}
-              onClick={() => onTileClick(getTileData(tile))}
-              {...tile}
-            />
-          );
+          {getLeftSquare().slice().reverse().map((tile) => {
+            const adjustedPositions = getAdjustedPositions('left', positions);
+            return (
+              <GameBox
+                id={tile.index}
+                key={tile.index}
+                square={SquareType.VERTICAL_SQUARE}
+                tileData={getTileData(tile)}
+                players={players}
+                playerPositions={adjustedPositions}
+                onClick={() => onTileClick(getTileData(tile))}
+                {...tile}
+              />
+            );
           })}
         </div>
 
@@ -288,7 +313,8 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
         </div>
 
         <div className='space corner go-to-jail'>
-        {getJailCorner().map((tile) => {
+          {getJailCorner().map((tile) => {
+            const cornerPositions = getAdjustedPositions('corner', positions);
             return (
               <GameBox
                 id={tile.index}
@@ -296,7 +322,7 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
                 square={SquareType.CORNER_SQUARE}
                 tileData={getTileData(tile)}
                 players={players}
-                playerPositions={positions}
+                playerPositions={cornerPositions}
                 onClick={() => onTileClick(getTileData(tile))}
                 {...tile}
               />
@@ -306,25 +332,22 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
 
         <div className='row vertical-row right-row'>
           {getRightSquare().map((tile) => {
-            // adjust player position
-            const adjustedPositions: Record<string, number> = Object.keys(positions).reduce((acc, playerId) => {
-              acc[playerId] = positions[playerId] - 1;
-              return acc;
-            }, {} as Record<string, number>);
-          return (
-            <GameBox
-              id={tile.index}  
-              key={tile.index}
-              square={SquareType.VERTICAL_SQUARE}
-              tileData={getTileData(tile)}
-              players={players}
-              playerPositions={adjustedPositions}
-              onClick={() => onTileClick(getTileData(tile))} // Use tile's own index for accurate positioning
-              {...tile}
-            />
-          );
+            const adjustedPositions = getAdjustedPositions('right', positions);
+            return (
+              <GameBox
+                id={tile.index}
+                key={tile.index}
+                square={SquareType.VERTICAL_SQUARE}
+                tileData={getTileData(tile)}
+                players={players}
+                playerPositions={adjustedPositions}
+                onClick={() => onTileClick(getTileData(tile))}
+                {...tile}
+              />
+            );
           })}
         </div>
+
 
       </div>
     </div>
