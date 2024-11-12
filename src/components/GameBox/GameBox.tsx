@@ -7,9 +7,9 @@ import { ActionPopup } from './ActionPopup'
 import { GoBox, AvenueBox, SpecialBox } from './BoxTypes'
 import './gameBox.scss'
 import { simulateContract, writeContract } from '@wagmi/core'
-import { abi } from './abi'
-import { config } from './config'
-import { PROPERTY_CONTRACT_ABI } from '../../contracts-abi'; // Import the ABI
+//import { abi } from './abi'
+//import { config } from './config'
+import { CONTRACT_ABI } from '../../contracts-abi'; // Import the ABI
 
 export const GameBox = (props:any) => {
   const {
@@ -99,9 +99,9 @@ export const GameBox = (props:any) => {
 
     try {
       const { request } = await simulateContract(config,{
-        address: '0x...', // Address of the Property contract
-        abi: PROPERTY_CONTRACT_ABI,
-        functionName: 'purchase',
+        address: '0x5fbdb2315678afecb367f032d93f642f64180aa3', // Address of the Property contract
+        abi: CONTRACT_ABI,
+        functionName: 'buyProperty',
         args: [currentPlayer.address], 
       });
 

@@ -5,9 +5,11 @@ import { COLORS } from '../../../backend/shared/constants';
 import { showToast } from '../../utilities';
 import { GameState, ServerPlayerData } from '../../../backend/shared/types'; // Use ServerPlayerData
 import './startScreen.scss';
-import { useAccount } from 'wagmi';
 import { monopolyInstance } from '../../models/Monopoly';
-
+import { useAccount } from 'wagmi';
+import { simulateContract, writeContract } from '@wagmi/core'
+import { config } from '../../config'
+import { CONTRACT_ABI } from '../../contracts-abi'; 
 
 const StartScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -35,7 +37,7 @@ const StartScreen: React.FC = () => {
     };
   }, [navigate]);
 
-  const handleJoinGame = () => {
+  const handleJoinGame = async () => {
     if (!isConnected) {
       showToast('Please connect your wallet first.');
       return;
@@ -43,6 +45,20 @@ const StartScreen: React.FC = () => {
 
     if (playerName.trim() && address) {
       monopolyInstance.joinGame(playerName, playerColor, address);
+/*       try {
+        const { request } = await simulateContract(config,{
+          address: '0x5fbdb2315678afecb367f032d93f642f64180aa3', // Address of the Property contract
+          abi: CONTRACT_ABI,
+          functionName: 'mintMonopolyMoney',
+          args: [address, 1500], 
+        });
+  
+        const result = await writeContract(config, request); // Use the request from simulateContract
+  
+        console.log('Sent 1500 token to:', address); 
+      } catch (error) {
+        console.error('Error buying property:', error);
+      } */
     } else {
       showToast('Please enter your name');
     }

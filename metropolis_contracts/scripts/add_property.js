@@ -37,6 +37,7 @@ async function main() {
     // token_contract = await upgrades.deployProxy(TOKEN_proxyFactory, ['300000000000000000000000000'], { initializer: "__initializeNVM" });
     token_contract = await ethers.getContract("Metropolis");
     //providerAddress = 'http://localhost:8545'
+    console.log("on localhost")
   } else if (hre.network.name == 'testnet') {
     console.log("on testnet")
     token_contract = await token_Factory.attach("")
@@ -49,7 +50,6 @@ async function main() {
   console.log("token_contract address: ", token_contract.target)
 
   const gameBlocks = JSON.parse(fs.readFileSync('../backend/shared/data/gameBlocks.json', 'utf8'));
-  let counter = 0;
 
   // Add properties from JSON data
   for (const block of gameBlocks) {
@@ -65,11 +65,9 @@ async function main() {
       }
 
       try {
-        if (counter >= 3) {
-          console.log(`Simulating a fail for property ${block.name}`);
-          throw new Error("Simulated transaction failure");
-        }
+        //console.log("Adding property to the contract...", block);
         const txResult = await token_contract.addProperty(
+          block.index,
           block.name,
           block.price,
           block.baserent ? [block.baserent, block.rent1, block.rent2, block.rent3, block.rent4, block.rent5] : [] ,

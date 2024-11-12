@@ -329,3 +329,46 @@ getGameState(): GameState {
     return this.players.subscribe(listener);
   }
 }
+
+
+/*
+tokens can be minted only by deployer or from accounts with role: METROPOLIS_MINTER_ROLE
+backend needs to mint and send the tokens to the player, while starting the game and in other conditions defined by the game logic
+
+import { writeContract } from 'wagmi';
+import { ethers } from 'ethers'; // Import ethers.js
+
+
+async function mintMonopolyMoneyWithPrivateKey(privateKey: string, to: string, amount: number) {
+  try {
+    // Create a wallet instance from the private key
+    const wallet = new ethers.Wallet(privateKey);
+
+    // Get the provider from your Wagmi config
+    const provider = config.provider as any; // Type assertion might be needed depending on your config
+
+    // Connect the wallet to the provider
+    const signer = wallet.connect(provider());
+
+    // Call the mintMonopolyMoney function
+    const result = await writeContract({
+      address: '0x...', // Address of your Metropolis contract
+      abi: METROPOLIS_CONTRACT_ABI,
+      functionName: 'mintMonopolyMoney',
+      args: [to, amount],
+      signerOrProvider: signer, // Use the signer connected to the private key
+    });
+
+    console.log('Monopoly Money minted:', result.hash);
+  } catch (error) {
+    console.error('Error minting Monopoly Money:', error);
+  }
+}
+
+// Example usage:
+const privateKey = 'your_private_key'; // Replace with the actual private key
+const recipientAddress = '0x...'; // Address to receive the Monopoly Money
+const amount = 1500;
+
+mintMonopolyMoneyWithPrivateKey(privateKey, recipientAddress, amount);
+*/

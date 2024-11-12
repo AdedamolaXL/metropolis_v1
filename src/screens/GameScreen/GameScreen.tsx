@@ -4,8 +4,10 @@ import GameBoardLayout from './GameBoardLayout';
 import { GameBoardSpace } from '../../../backend/shared/types';
 import { monopolyInstance } from '../../models/Monopoly';
 import { useNavigate } from 'react-router-dom';
-
+import { simulateContract, writeContract } from '@wagmi/core'
 import { useAccount } from 'wagmi'
+import { config } from '../../config'
+import { CONTRACT_ABI } from '../../contracts-abi'; // Import the ABI
 
 
 const GameScreen: React.FC = () => {
@@ -36,12 +38,26 @@ const GameScreen: React.FC = () => {
   }, [selectedTile]);
 
 
-  const handleBuyProperty = () => {
+  const handleBuyProperty = async () => {
     if (selectedTile && selectedTile.propertyData) {
       const propertyId = selectedTile.propertyData.id;
       if (propertyId !== undefined) {
         console.log('Property ID:', propertyId); // Check if this logs correctly
         monopolyInstance.buyProperty(propertyId);
+        try {
+          const { request } = await simulateContract(config,{
+            address: '0x5fbdb2315678afecb367f032d93f642f64180aa3', // Address of the Property contract
+            abi: CONTRACT_ABI,
+            functionName: 'buyProperty',
+            args: [address], 
+          });
+    
+          const result = await writeContract(config, request); // Use the request from simulateContract
+    
+          console.log('Property purchased:', result); 
+        } catch (error) {
+          console.error('Error buying property:', error);
+        }
       } else {
         console.log("Property ID is undefined.");
       }

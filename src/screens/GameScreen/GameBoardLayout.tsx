@@ -6,10 +6,18 @@ import './gameBoard.scss';
 import data from '../../../backend/shared/data/gameBlocks.json'
 import { BOX_TYPES, SquareType } from '../../../backend/shared/constants';
 import DiceControls from './DiceControl';
+import { useAccount } from 'wagmi';
+import { simulateContract, readContract } from '@wagmi/core'
+import { config } from '../../config'
+import { CONTRACT_ABI } from '../../contracts-abi'; 
 
 interface GameBoardLayoutProps {
   onTileClick: (getTileData: GameBoardSpace) => void;
 } 
+
+
+
+
 
 const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({ 
   onTileClick,
@@ -19,8 +27,34 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
   const [positions, setPositions] = useState<Record<string, number>>({});
 
   console.log(monopolyInstance)
+  const { address } = useAccount()
 
+  const updatePlayerBalance = async () => {
+    if (address) { 
+      try {
+        const { request } = await simulateContract(config, {
+          address: '0x5fbdb2315678afecb367f032d93f642f64180aa3', 
+          abi: CONTRACT_ABI,
+          functionName: 'getMonopolyMoneyBalance',
+          args: [address],
+        });
   
+        const result = await readContract(config, request);
+        console.log('Player balance updated:', result);
+  
+        // Update the player's balance in the monopolyInstance
+        const currentPlayer = monopolyInstance.players.current();
+        if (currentPlayer) {
+          console.log("currentPlayer.balance:", currentPlayer.balance)
+          currentPlayer.balance = Number(BigInt(result as bigint).toString());
+          // Update the players state to trigger a re-render
+          setPlayers([...monopolyInstance.players.getArray()]); 
+        }
+      } catch (error) {
+        console.error('Error updating player balance:', error);
+      }
+    }
+  };
 
   useEffect(() => {
     setBoardData(monopolyInstance.boardData);
@@ -30,7 +64,13 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
       setPositions(monopolyInstance.playerPositions);
     });
 
+
+    
+    // Call updatePlayerBalance every 5 seconds
+    const intervalId = setInterval(updatePlayerBalance, 5000);
+
     return () => {
+      clearInterval(intervalId); // Clear interval on component unmount
       unsubscribe();
     }
   }, []);
@@ -163,9 +203,17 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
               <div className="player-name">{player.name}</div>
               <div className="player-marker" style={{ backgroundColor: player.color }}>{player.name[0]}</div>
               <div className="player-balance">Balance: ${player.balance}</div>
+
+              {/* Call updatePlayerBalance after displaying the balance */}
               {monopolyInstance.players.current()?.id === player.id && (
+                <>
                   <div className="current-turn-indicator">Current Turn</div>
-                )}
+                  {/* Call the function to update the balance from the contract */}
+                  {address && ( 
+            <button onClick={() => updatePlayerBalance()}>Update Balance</button> 
+                  )}
+                </>
+              )}
               </div>
             ))}
           </div>
