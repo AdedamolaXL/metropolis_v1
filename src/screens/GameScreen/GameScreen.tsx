@@ -13,24 +13,82 @@ import { CONTRACT_ABI } from '../../contracts-abi'; // Import the ABI
 const GameScreen: React.FC = () => {
   const { address } = useAccount()
   const [selectedTile, setSelectedTile] = useState<GameBoardSpace | null>(null);
+  const [boardData, setBoardData] = useState<GameBoardSpace[]>([])
   const navigate = useNavigate()
   const [refresh, setRefresh] = useState(true)
 
 
  
-  
-
   useEffect(() => {
-    if (!monopolyInstance.players.current) navigate('/')
-      console.log('Address', refresh)
-  }, [navigate])
+    if (!monopolyInstance.players.current) {
+      navigate('/');
+      return;
+    }
 
+    // Initial board data setup
+    const initialBoardData = monopolyInstance.updatedBoard;
+    if (initialBoardData && initialBoardData.length > 0) {
+      setBoardData(initialBoardData);
+    }
 
+    // Set up socket event listeners
+    const handleBoardUpdate = () => {
+      const newBoardData = monopolyInstance.updatedBoard;
+      console.log('Board update received:', newBoardData);
+      
+      // if (newBoardData && newBoardData.length > 0) {
+      //   setBoardData(prevData => {
+      //     // Only update if the new data is different
+      //     const hasChanges = JSON.stringify(prevData) !== JSON.stringify(newBoardData);
+      //     return hasChanges ? [...newBoardData] : prevData;
+      //   });
+      // }
+
+      if (newBoardData && newBoardData.length > 0) {
+        setBoardData(newBoardData);
+      }
+    };
+
+    // Subscribe to board updates
+    const unsubscribe = monopolyInstance.subscribeToBoardUpdates(handleBoardUpdate);
+
+    // Clean up
+    return () => {
+      unsubscribe();
+    };
+  }, [navigate]);
+  
+  
+  // useEffect(() => {
+  //   // Save the board data to local storage
+  //   localStorage.setItem('boardData', JSON.stringify(boardData));
+  // }, [boardData]);
+
+  // useEffect(() => {
+  //   // Retrieve the board data from local storage on initial load
+  //   const storedBoardData = localStorage.getItem('boardData');
+  //   if (storedBoardData) {
+  //     setBoardData(JSON.parse(storedBoardData));
+  //   } else {
+  //     // Fallback to the initial board data from monopolyInstance
+  //     const initialBoardData = monopolyInstance.updatedBoard;
+  //     if (initialBoardData && initialBoardData.length > 0) {
+  //       setBoardData(initialBoardData);
+  //     }
+  //   }
+  // }, []);
   
 
+  
   const handleTileClick = (tile: GameBoardSpace) => {
-    setSelectedTile(tile);
-    console.log('Tile clicked:', tile);
+    const updatedTile = boardData.find((space) => space.index === tile.index) || tile;
+    setSelectedTile(updatedTile);
+
+    if (updatedTile.currentPlayer) {
+      console.log('Tile clicked by current player:', updatedTile.currentPlayer.name);
+    } else {
+      console.log('Tile clicked:', updatedTile);
+    }
   };
   
   useEffect(() => {
@@ -67,13 +125,24 @@ const GameScreen: React.FC = () => {
   };
   
 
-  console.log('Selected Tile propertyData:', selectedTile?.propertyData);
+  console.log('Selected Tile propertyData:', selectedTile?.propertyData, selectedTile?.currentPlayer);
 
-  const handleRentProperty = () => {
-    if (selectedTile) {
-      monopolyInstance.rentProperty(selectedTile);
+ 
+  // Conditionally log the updated board state if non-empty
+  useEffect(() => {
+    if (boardData.length > 0) {
+      console.log('Updated board state:', boardData);
     }
-  };
+  }, [boardData]);
+
+  // Re-render periodically if needed
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setRefresh((prev) => !prev); // Toggle state to re-render
+  //   }, 1000);
+  
+  //   return () => clearInterval(interval); // Cleanup on component unmount
+  // }, []);
 
   return (
     <div className="">
@@ -83,12 +152,11 @@ const GameScreen: React.FC = () => {
       {selectedTile && (
         <div className="">
           <h3>{selectedTile.name}</h3>
-          <p>Type: {selectedTile.pricetext}</p>
+          <p>Price: {selectedTile.pricetext}</p>
           {selectedTile.currentPlayer && (
             <h3>Current Player: {selectedTile.currentPlayer.name}</h3>
           )}
           <button onClick={handleBuyProperty}>Buy Property</button>
-          <button onClick={handleRentProperty}>Rent Property</button>
         </div>
       )}
     </div>

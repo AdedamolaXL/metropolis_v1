@@ -15,7 +15,7 @@ class Monopoly {
   public socket: Socket;
   public players: Cycled<ClientPlayerData>;
   public gameState: GameState;
-  public boardData: GameBoardSpace[] = [];
+  private _boardData: GameBoardSpace[] = []; 
   public communityCards: Card[];
   public chanceCards: Card[];
   public logs: string[] = [];
@@ -23,16 +23,14 @@ class Monopoly {
   private subscribers: (() => void)[] = [];
   public playerPositions: Record<string, number> = {};
   public properties: Property[];
-  
-  // public get lastDiceValue(): number {
-  //   return this.gameState.currentPlayer?.lastDiceValue ?? 0;
-  // }
-  
-  // public get currentPlayerName(): string {
-  //   return this.gameState.currentPlayer?.name;
-  // }
-
+  private _lastBoardUpdate: number = Date.now();
   private _currentPlayerId: string | null = null;
+  
+
+
+  
+
+  
   
 
   constructor() {
@@ -67,6 +65,16 @@ class Monopoly {
       }
     };
 
+
+    const storedBoardData = localStorage.getItem('boardData');
+    if (storedBoardData) {
+      this._boardData = JSON.parse(storedBoardData);
+      console.log('Loaded initial board data from local storage:', this._boardData);
+    } else {
+      // If no stored data, request the initial board data from the server
+      this.requestBoardUpdate();
+    }
+
   }
 
   
@@ -84,24 +92,26 @@ class Monopoly {
 
       this._currentPlayerId = this.gameState.currentPlayer?.id || null;
       
-      // Then update players
-      this.updatePlayers(this.gameState.players as ClientPlayerData[]);
-      
-       // Synchronize the cycled array with current player
-       if (this._currentPlayerId) {
-        const currentPlayerIndex = this.players.getArray().findIndex(
-          player => player.id === this._currentPlayerId
-        );
-        if (currentPlayerIndex !== -1) {
-          this.players.index = currentPlayerIndex;
-        }
+       // Then update players
+    this.updatePlayers(this.gameState.players as ClientPlayerData[]);
+    
+    // Force sync the cycled array with current player
+    if (this._currentPlayerId) {
+      const currentPlayerIndex = this.players.getArray().findIndex(
+        player => player.id === this._currentPlayerId
+      );
+      if (currentPlayerIndex !== -1) {
+        this.players.index = currentPlayerIndex;
+        console.log('Cycled array synced to player index:', currentPlayerIndex);
       }
+    }
 
       // Verify synchronization
       const syncCheck = {
         gameStatePlayer: this.gameState.currentPlayer?.name,
         currentPlayer: this.currentPlayer?.name,
-        currentPlayerId: this._currentPlayerId
+        currentPlayerId: this._currentPlayerId,
+        playersArray: this.players.getArray().map(p => ({ id: p.id, name: p.name }))
       };
       console.log('Synchronization check:', syncCheck);
       
@@ -109,10 +119,45 @@ class Monopoly {
     });
 
     this.socket.on('gameBoardData', (data: GameBoardSpace[]) => {
-      this.boardData = data;  
-      console.log("Board Data updated:", this.boardData);
-      this.notifySubscribers();
+      console.log('Received initial board data:', data);
+      if (Array.isArray(data) && data.length > 0) {
+        this._boardData = [...data];
+        this._lastBoardUpdate = Date.now();
+
+        localStorage.setItem('boardData', JSON.stringify(this._boardData));
+
+        this.notifySubscribers();
+      }
     });
+
+    this.socket.on('updateBoardData', (updatedData: Partial<GameBoardSpace>[]) => {
+      console.log('Received updateBoardData:', updatedData);
+      
+      if (Array.isArray(updatedData) && updatedData.length > 0) {
+        const updatedBoard = [...this._boardData];
+
+        updatedData.forEach(update => {
+          if (update.index !== undefined) {
+            const index = updatedBoard.findIndex(space => space.index === update.index);
+            if (index !== -1) {
+              updatedBoard[index] = {
+                ...updatedBoard[index],
+                ...update
+              };
+              console.log(`Board space updated at index ${update.index}:`, updatedBoard[index]);
+            }
+          }
+        });
+
+        this._boardData = updatedBoard;
+        this._lastBoardUpdate = Date.now();
+        localStorage.setItem('boardData', JSON.stringify(this._boardData));
+        this.notifySubscribers();
+      }
+    });
+  
+  
+    
 
     // Update properties
     this.socket.on('updateProperties', (properties: Property[]) => {
@@ -123,9 +168,23 @@ class Monopoly {
 
       this.socket.on('updatePlayers', (players: ServerPlayerData[]) => {
       const updatedPlayers = players.map(this.convertToClientPlayerData);
+      
+      // Create a new positions object
+      const newPositions: Record<string, number> = {};
+      updatedPlayers.forEach(player => {
+        if (player.name) {
+          newPositions[player.name] = player.currentIndex;
+        }
+      });
+      
+      // Update positions with new reference
+      this.playerPositions = newPositions;
+      
       this.updatePlayers(updatedPlayers);
-      console.log('Updated players:', updatedPlayers);
-      console.log('Updated playerPositions:', this.playerPositions);
+      console.log('Updated players and positions:', {
+        players: updatedPlayers,
+        positions: this.playerPositions
+      });
       this.notifySubscribers();
     });
 
@@ -157,13 +216,21 @@ class Monopoly {
 
     this.socket.on('diceRolled', ({ playerName, roll, currentIndex }) => {
       const currentPlayer = this.players.find(player => player.name === playerName);
+      
+      
       if (currentPlayer) {
         currentPlayer.lastDiceValue = roll;
         currentPlayer.currentIndex = currentIndex;
         
-        this.playerPositions[currentPlayer.id] = currentIndex;
-        console.log("Dice rolled:", roll, "Current index:", currentIndex);
-        console.log("Updated playerPositions:", this.playerPositions);
+        this.playerPositions[playerName] = currentIndex;
+        
+        // Force a new reference for playerPositions
+        this.playerPositions = { ...this.playerPositions };
+
+        console.log("Updated playerPositions for", playerName, ":", {
+          rawPosition: currentIndex,
+          storedPosition: this.playerPositions[playerName]
+        });
         this.notifySubscribers();
       }
     });
@@ -191,6 +258,52 @@ class Monopoly {
 
   }
 
+  public get boardData(): GameBoardSpace[] {
+    return this._boardData;
+  }
+
+  public get lastBoardUpdate(): number {
+    return this._lastBoardUpdate;
+  }
+
+
+  public get updatedBoard(): GameBoardSpace[] {
+    if (this._boardData.length === 0) {
+      console.warn('Board data is empty');
+      return [];
+    }
+    
+    console.log('Returning updated board data:', this._boardData);
+    return [...this._boardData];
+  }
+
+  public requestBoardUpdate(): void {
+    this.socket.emit('requestBoardData');
+  }
+
+  public hasSpaceBeenUpdated(spaceIndex: number): boolean {
+    const space = this._boardData.find(space => space.index === spaceIndex);
+    return !!space;
+  }
+
+  public getBoardSpace(spaceIndex: number): GameBoardSpace | undefined {
+    return this._boardData.find(space => space.index === spaceIndex);
+  }
+
+  public subscribeToBoardUpdates(callback: () => void): () => void {
+    // Subscribe to board updates
+    const unsubscribe = this.subscribe(callback);
+
+    if (this.boardData.length > 0) {
+      callback();
+    }
+  
+    // Return the unsubscribe function to allow cleanup
+    return unsubscribe;
+  }
+
+
+
   public subscribe(callback: () => void): () => void {
     this.subscribers.push(callback);
     return () => {
@@ -199,8 +312,16 @@ class Monopoly {
   }
 
   private notifySubscribers(): void {
+    if (this._boardData.length > 0) {
+      console.log('Notifying subscribers of board update:', {
+        boardLength: this._boardData.length,
+        lastUpdate: this._lastBoardUpdate,
+        sampleSpace: this._boardData[0]
+      });
+    }
     this.subscribers.forEach(callback => callback());
   }
+
 
   private convertToClientPlayerData(player: ServerPlayerData): ClientPlayerData {
     return {
@@ -241,33 +362,6 @@ class Monopoly {
     }
   }
 
-  
- // Updated joinGame to send both name and color as the server expects
-//  public joinGame(name: string, color: string, walletAddress: string): void {
-//   this.socket.emit('joinGame', { name, color, walletAddress });
-
-//   this.socket.on('gameBoardData', (data: GameBoardSpace[]) => {
-//     this.boardData = data;
-//     this.playerPositions = {}; // Initialize player positions
-//   });
-
-//   this.socket.on('gameState', (state: GameState) => {
-//     this.gameState = {
-//       ...state,
-//       players: state.players.map(player => this.convertToClientPlayerData(player)),
-//     };
-//     this.updatePlayers(this.gameState.players as ClientPlayerData[]);
-//     this.playerPositions = {}; // Initialize player positions
-//     state.players.forEach((player, index) => {
-//       this.playerPositions[player.id] = player.currentIndex;
-//     });
-//   });
-
-//   this.socket.on('error', (message: string) => {
-//     console.error(`Error: ${message}`);
-//     this.addLog(`Error: ${message}`);
-//   });
-// }
 
 
 public joinGame(name: string, color: string, walletAddress: string): void {
@@ -292,24 +386,39 @@ public rollDice(): void {
   const stateSnapshot = {
     gameStatePlayer: this.gameState.currentPlayer,
     currentPlayer: this.currentPlayer,
-    currentPlayerId: this._currentPlayerId
+    currentPlayerId: this._currentPlayerId,
+    allPlayers: this.players.getArray().map(p => ({ id: p.id, name: p.name }))
   };
   
   console.log('State snapshot before roll:', stateSnapshot);
 
-  const currentPlayer = this.currentPlayer;
+  const currentPlayer = this.currentPlayer || this.gameState.currentPlayer;
   if (!currentPlayer) {
-    console.log('No current player found');
+    console.log('No current player found after resync attempt');
     return;
   }
 
-  // Check if it's the player's turn using currentPlayerId
-  if (this._currentPlayerId !== currentPlayer.id) {
-    console.log('Turn validation failed:');
-    console.log('Expected player ID:', this._currentPlayerId);
-    console.log('Attempting player ID:', currentPlayer.id);
-    console.log('Expected player name:', this.gameState.currentPlayer?.name);
-    console.log('Attempting player name:', currentPlayer.name);
+  // Resync current player if needed
+  if (!this.currentPlayer && this.gameState.currentPlayer) {
+    this._currentPlayerId = this.gameState.currentPlayer.id;
+    const playerIndex = this.players.getArray().findIndex(
+      player => player.id === this._currentPlayerId
+    );
+    if (playerIndex !== -1) {
+      this.players.index = playerIndex;
+      console.log('Resynced current player:', this.currentPlayer);
+    }
+  }
+
+  const isCurrentPlayerTurn = this._currentPlayerId === currentPlayer.id || 
+                            this.gameState.currentPlayer?.id === currentPlayer.id;
+
+  if (!isCurrentPlayerTurn) {
+    console.log('Turn validation failed:', {
+      expectedId: this._currentPlayerId,
+      attemptingId: currentPlayer.id,
+      gameStatePlayerId: this.gameState.currentPlayer?.id
+    });
     return;
   }
 
@@ -318,13 +427,18 @@ public rollDice(): void {
   
   this.socket.once('diceRolled', ({ playerName, roll, currentIndex }) => {
     console.log('Dice rolled event received:', { playerName, roll, currentIndex });
-    if (playerName === currentPlayer.name) {
-      currentPlayer.lastDiceValue = roll;
-      currentPlayer.currentIndex = currentIndex;
-      this.emitPlayerPosition(currentPlayer.id, currentIndex);
-      console.log("Dice roll completed for player:", playerName, "Roll:", roll, "Position:", currentIndex);
-      this.notifySubscribers();
+    if (this.currentPlayer) {
+      this.currentPlayer.lastDiceValue = roll;
+      this.currentPlayer.currentIndex = currentIndex;
     }
+    if (this.gameState.currentPlayer) {
+      this.gameState.currentPlayer.lastDiceValue = roll;
+      this.gameState.currentPlayer.currentIndex = currentIndex;
+    }
+    
+    this.emitPlayerPosition(currentPlayer.id, currentIndex);
+    console.log("Dice roll completed for player:", playerName, "Roll:", roll, "Position:", currentIndex);
+    this.notifySubscribers();
   });
 }
 
@@ -421,15 +535,42 @@ public rollDice(): void {
   }
 
   public get currentPlayer(): ClientPlayerData | null {
-    if (!this._currentPlayerId) return null;
-    return this.players.find(player => player.id === this._currentPlayerId) || this.players.current() || null;
+    // First try to get the current player from the cycled array
+    const cycledPlayer = this.players.current();
+    
+    // If we have a currentPlayerId, try to find that player
+    if (this._currentPlayerId) {
+      const playerById = this.players.find(player => player.id === this._currentPlayerId);
+      if (playerById) {
+        return playerById;
+      }
+    }
+    
+    // If we have a gameState currentPlayer, use that
+    if (this.gameState.currentPlayer) {
+      const gameStatePlayer = this.players.find(player => player.id === this.gameState.currentPlayer?.id);
+      if (gameStatePlayer) {
+        return gameStatePlayer;
+      }
+    }
+    
+    // Fall back to the cycled player if we found one
+    return cycledPlayer || null;
   }
+
   public emitPlayerPosition(playerId: string, position: number): void {
     const player = this.players.find(p => p.id === playerId);
     if (player && player.name) {
-      this.playerPositions[player.name] = position; // Use name instead of ID
+      // Create new reference for positions object
+      this.playerPositions = {
+        ...this.playerPositions,
+        [player.name]: position
+      };
+
+      console.log(`Emitting position for ${player.name}:`, position);
       this.notifySubscribers();
     }
+
   }
 
   public addLog(message: string) {

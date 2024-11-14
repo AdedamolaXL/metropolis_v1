@@ -40,7 +40,10 @@ export function setupSocketHandlers(io: Server) {
         const currentIndex = gameManager.handlePlayerTurn(player, diceRoll);
         io.emit('diceRolled', 
           {playerName: player.name, roll: diceRoll, currentIndex: currentIndex });
-
+      
+        // Emit the specific update for board data right after handlePlayerTurn
+        io.emit('updateBoardData', gameManager.getBoardData());
+        
        // Emit updated game state after handling the turn
        io.emit('gameState', gameManager.getGameState());
 
