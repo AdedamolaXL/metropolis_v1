@@ -33,7 +33,7 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
     if (address) { 
       try {
         const { request } = await simulateContract(config, {
-          address: '0x5fbdb2315678afecb367f032d93f642f64180aa3', 
+          address: '0xE2E4B01C3421A99852f0f998ab2C8F424bD14e7B', 
           abi: CONTRACT_ABI,
           functionName: 'getMonopolyMoneyBalance',
           args: [address],
@@ -68,11 +68,12 @@ const GameBoardLayout: React.FC<GameBoardLayoutProps> = ({
 
 
     
-    // Call updatePlayerBalance every 5 seconds
-    const intervalId = setInterval(updatePlayerBalance, 5000);
+    // Call updatePlayerBalance every 5 seconds if needed
+    //const intervalId = setInterval(updatePlayerBalance, 5000);
 
     return () => {
-      clearInterval(intervalId); // Clear interval on component unmount
+      // intervalId of updatePlayerBalance
+      //clearInterval(intervalId); // Clear interval on component unmount
       unsubscribe();
     }
   }, []);
