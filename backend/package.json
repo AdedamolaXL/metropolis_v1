@@ -10,6 +10,8 @@
   "author": "AXL",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.4",
     "express": "^4.21.1",
     "socket.io": "^4.8.0"
   },

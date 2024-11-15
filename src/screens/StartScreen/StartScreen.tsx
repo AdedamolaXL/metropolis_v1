@@ -7,9 +7,9 @@ import { GameState, ServerPlayerData } from '../../../backend/shared/types'; // 
 import './startScreen.scss';
 import { monopolyInstance } from '../../models/Monopoly';
 import { useAccount } from 'wagmi';
-import { simulateContract, writeContract } from '@wagmi/core'
+/* import { simulateContract, writeContract } from '@wagmi/core'
 import { config } from '../../config'
-import { CONTRACT_ABI } from '../../contracts-abi'; 
+import { CONTRACT_ABI } from '../../contracts-abi';  */
 
 const StartScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ const StartScreen: React.FC = () => {
       monopolyInstance.joinGame(playerName, playerColor, address);
 /*       try {
         const { request } = await simulateContract(config,{
-          address: '0x5fbdb2315678afecb367f032d93f642f64180aa3', // Address of the Property contract
+          address: '0xE2E4B01C3421A99852f0f998ab2C8F424bD14e7B', // Address of the Property contract
           abi: CONTRACT_ABI,
           functionName: 'mintMonopolyMoney',
           args: [address, 1500], 
