@@ -37,20 +37,45 @@ export function setupSocketHandlers(io: Server) {
       const player = gameManager.getCurrentPlayer();
       if (player) {
         const diceRoll = gameManager.rollDice(player.id);
-        const currentIndex = gameManager.handlePlayerTurn(player, diceRoll);
-        io.emit('diceRolled', 
-          {playerName: player.name, roll: diceRoll, currentIndex: currentIndex });
-      
-        // Emit the specific update for board data right after handlePlayerTurn
-        io.emit('updateBoardData', gameManager.getBoardData());
         
-       // Emit updated game state after handling the turn
-       io.emit('gameState', gameManager.getGameState());
+         // Capture the return value from handlePlayerTurn
+         const playerMoveResult = gameManager.handlePlayerTurn(player, diceRoll);
 
-       gameManager.nextTurn();
-       io.emit('gameState', gameManager.getGameState());
+         io.emit('diceRolled', { playerName: player.name, roll: diceRoll, currentIndex: player.currentIndex });
+         io.emit('updateBoardData', gameManager.getBoardData());
+     
+         // Use type narrowing to check if playerMoveResult contains promptBuy
+         if (typeof playerMoveResult === 'object' && 'promptBuy' in playerMoveResult) {
+           socket.emit('promptBuyProperty', { property: playerMoveResult.promptBuy, player });
+         } else {
+           // End the turn and update the game state if no property prompt is needed
+           gameManager.nextTurn();
+           io.emit('gameState', gameManager.getGameState());
+         }
       }
     });
+
+
+    // Handle player's decision to buy or skip
+socket.on('confirmPurchase', (propertyId: number) => {
+  const player = gameManager.getCurrentPlayer();
+  if (player) {
+    const success = gameManager.buyProperty(player.id, propertyId);
+    if (success) {
+      io.emit('updateProperties', gameManager.getGameState().properties);
+      io.emit('updatePlayers', gameManager.getGameState().players);
+    } else {
+      socket.emit('error', 'Cannot purchase property.');
+    }
+  }
+  gameManager.nextTurn();
+  io.emit('gameState', gameManager.getGameState());
+});
+
+socket.on('skipPurchase', () => {
+  gameManager.nextTurn();
+  io.emit('gameState', gameManager.getGameState());
+});
 
     socket.on('turnChanged', (nextPlayerId) => {
       // socket.emit('turnChanged', playerId);

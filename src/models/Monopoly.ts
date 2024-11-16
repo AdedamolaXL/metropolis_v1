@@ -3,6 +3,7 @@ import { Cycled } from '../../backend/utilities/cycled';
 import { io, Socket} from 'socket.io-client';
 import communityCards from '../../backend/shared/data/communityCards.json'
 import chanceCards from '../../backend/shared/data/chanceCards.json'
+import { faLessThanEqual } from '@fortawesome/free-solid-svg-icons';
 
 interface Card {
   id: string;
@@ -57,7 +58,7 @@ class Monopoly {
         color: '',
         currentIndex: 0,
         ownedProperties: [],
-        playerTurn: 0,
+        playerTurn: false,
         lastTurnBlockID: null,
         lastDiceValue: 0,
         balance: 0,
@@ -188,29 +189,17 @@ class Monopoly {
       this.notifySubscribers();
     });
 
-    // this.socket.on('gameState', (gameState) => {
-    //   console.log('Updated game state:', gameState);
-    //   console.log("Checking if it's the correct player's turn...");
-    // console.log("Current Player:", this.gameState.currentPlayer?.name);
-    // console.log("Attempting Player:", this.currentPlayer?.name);
-
-    // if (this.gameState.currentPlayer?.name !== this.currentPlayer?.name) {
-    //   console.log("It's not your turn!");
-    //   return;
-    // }
-
-    // console.log("It's your turn, proceed with action...");
+    // this.socket.on('gameState', (state: GameState) => {
+    //   const updatedPlayers = state.players.map(player => this.convertToClientPlayerData(player));
+    //   this.gameState = {
+    //     ...state,
+    //     players: updatedPlayers
+    //   };
+    //   this.updatePlayers(updatedPlayers);
+    //   this.notifySubscribers();
     // });
 
-    this.socket.on('gameState', (state: GameState) => {
-      const updatedPlayers = state.players.map(player => this.convertToClientPlayerData(player));
-      this.gameState = {
-        ...state,
-        players: updatedPlayers
-      };
-      this.updatePlayers(updatedPlayers);
-      this.notifySubscribers();
-    });
+
     
     
 
@@ -244,6 +233,19 @@ class Monopoly {
       this.notifySubscribers();
     });
 
+    this.socket.on('promptBuyProperty', ({ property, player }) => {
+      // Prompt the player to buy the property
+      this.promptBuyProperty(property, player);
+    });
+
+    this.socket.on('confirmPurchase', (propertyId: number) => {
+      this.confirmPurchase(propertyId);
+    });
+
+    this.socket.on('skipPurchase', () => {
+      this.skipPurchase();
+    });
+
 
      // Error handling for socket events
      this.socket.on('connect_error', (error) => {
@@ -257,6 +259,28 @@ class Monopoly {
     });
 
   }
+
+
+  private promptBuyProperty(property: GameBoardSpace, player: ClientPlayerData) {
+    console.log(`${player.name}, do you want to buy ${property.name}?`);
+
+    // Prompt the player to buy property with a UI, such as a modal or alert
+    // This can be implemented in the UI layer
+}
+
+public confirmPurchase(propertyId: number): void {
+    this.socket.emit('confirmPurchase', { propertyId });
+    console.log(`Property with ID ${propertyId} purchased.`);
+}
+
+public skipPurchase(): void {
+    this.socket.emit('skipPurchase');
+    console.log('Purchase skipped.');
+    this.nextTurn();
+}
+
+
+
 
   public get boardData(): GameBoardSpace[] {
     return this._boardData;
@@ -326,7 +350,7 @@ class Monopoly {
   private convertToClientPlayerData(player: ServerPlayerData): ClientPlayerData {
     return {
       ...player,
-      playerTurn: 0,
+      playerTurn: false,
       lastTurnBlockID: null,
       lastDiceValue: 0,
       balance: player.wealth,
@@ -419,6 +443,7 @@ public rollDice(): void {
       attemptingId: currentPlayer.id,
       gameStatePlayerId: this.gameState.currentPlayer?.id
     });
+    this.addLog(`It's not your turn! Please wait for ${this.gameState.currentPlayer?.name}'s turn.`);
     return;
   }
 
@@ -439,6 +464,12 @@ public rollDice(): void {
     this.emitPlayerPosition(currentPlayer.id, currentIndex);
     console.log("Dice roll completed for player:", playerName, "Roll:", roll, "Position:", currentIndex);
     this.notifySubscribers();
+
+    const currentBoardSpace = this.getBoardSpace(currentIndex);
+    if (currentBoardSpace) {
+      this.handleLandedSpace(this.currentPlayer!, currentBoardSpace);
+    }
+
   });
 }
 
@@ -450,39 +481,66 @@ public rollDice(): void {
     });
   }
 
-  // getGameState(): GameState {
-  //   return {
-  //     players: this.players.getArray().map(player => this.convertToClientPlayerData(player)),
-  //     properties: this.properties,
-  //     currentPlayer: this.players.current() ? this.convertToClientPlayerData(this.players.current()!) : null
-  //   };
-  // }
+  public handleLandedSpace(player: ClientPlayerData, space: GameBoardSpace): void {
+    // Handle properties that can be owned (like avenues, utilities, railroads)
+    if (['RAILROADS', 'AVENUE', 'ELECTRIC', 'WATER'].includes(space.type)) {
+        if (space.propertyData?.owner && space.propertyData?.owner !== player.id) {
+            // Space is owned by another player; pay rent
+            const rent = space.propertyData?.rent;
+            player.balance -= rent;
+            const owner = this.players.find(p => p.id === space.propertyData?.owner);
+            if (owner) {
+                owner.balance += rent;
+                this.addLog(`${player.name} paid $${rent} in rent to ${owner.name}`);
+                this.rentProperty(space); // Use socket event to handle rent payment server-side if needed
+            }
+        } else if (space.propertyData?.owner === player.id) {
+            this.addLog(`${player.name} landed on their own property, ${space.name}`);
+        } else {
+            // Unowned property; prompt to buy
+            this.promptBuyProperty(space, player);
+        }
+    } else {
+        // Handle other space types
+        switch (space.type) {
+            case 'CHANCE':
+                this.addLog(`${player.name} landed on Chance`);
+                this.drawCard('CHANCE');
+                break;
+            case 'COMMUNITY':
+                this.addLog(`${player.name} landed on Community Chest`);
+                this.drawCard('COMMUNITY');
+                break;
+            case 'INCOME':
+                player.balance -= 200;
+                this.addLog(`${player.name} paid $200 income tax`);
+                break;
+            case 'LUXURY':
+                player.balance -= 100;
+                this.addLog(`${player.name} paid $100 luxury tax`);
+                break;
+            case 'VISITING':
+                this.addLog(`${player.name} is just visiting jail`);
+                break;
+            case 'JAIL':
+                this.addLog(`${player.name} has been sent to jail`);
+                this.sendToJail(player); // Call sendToJail function to move player to jail space
+                break;
+            case 'GO':
+                player.balance += 200;
+                this.addLog(`${player.name} landed on GO and collected $200`);
+                break;
+            case 'PARKING':
+                this.addLog(`${player.name} landed on Free Parking`);
+                break;
+            default:
+                this.addLog(`${player.name} landed on an unknown space type.`);
+        }
+    }
 
-  // private handleLandedSpace(player: ClientPlayerData, space: GameBoardSpace): void {
-  //   switch (space.type) {
-  //     case 'CHANCE':
-  //       this.addLog(`${player.name} landed on Chance`);
-  //       this.drawCard('CHANCE');
-  //       break;
-  //     case 'COMMUNITY':
-  //       this.addLog(`${player.name} landed on Community Chest`);
-  //       this.drawCard('COMMUNITY');
-  //       break;
-  //     case 'INCOME':
-  //       player.balance -= 200;
-  //       this.addLog(`${player.name} paid $200 income tax`);
-  //       break;
-  //     case 'LUXURY':
-  //       player.balance -= 100;
-  //       this.addLog(`${player.name} paid $100 luxury tax`);
-  //       break;
-  //     case 'JAIL':
-  //       this.addLog(`${player.name} is just visiting jail`);
-  //       break;
-  //     // Add more cases as needed
-  //   }
-  //   this.emitGameState();
-  // }
+    this.emitGameState();
+    this.nextTurn();
+}
 
 
 
@@ -495,9 +553,13 @@ public rollDice(): void {
       
       // Emit turn change to server
       this.socket.emit('turnChanged', nextPlayer.id);
-      
+      this._currentPlayerId = nextPlayer.id;
+
       // Update local game state
       this.updatePlayers(this.players.getArray());
+
+     
+      this.notifySubscribers();
     }
   }
 
@@ -527,6 +589,18 @@ public rollDice(): void {
 
   public drawCard(cardType: 'CHANCE' | 'COMMUNITY'): void {
     this.socket.emit('drawCard', cardType);
+  }
+
+  private sendToJail(player: ClientPlayerData): void {
+    const jailIndex = this.boardData.findIndex((space) => space.name === 'Jail');
+    if (jailIndex !== -1) {
+      player.currentIndex = jailIndex;
+      player.isInJail = true;
+      this.addLog(`${player.name} has been sent to jail.`);
+      this.emitPlayerPosition(player.id, jailIndex);
+    } else {
+      console.error('Jail space not found in the board data.');
+    }
   }
 
   // New rentProperty method

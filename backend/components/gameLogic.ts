@@ -142,7 +142,7 @@ export class GameManager {
     return diceRoll;
   }
 
- handlePlayerTurn(player: ServerPlayerData, diceRoll: number) {
+ handlePlayerTurn(player: ServerPlayerData, diceRoll: number): number | { promptBuy: Property } { {
     // Clear the currentPlayer from the previous tile
     this.boardData.forEach((tile) => {
       if (tile.currentPlayer?.id && tile.currentPlayer.id === player.id) {
@@ -171,10 +171,17 @@ export class GameManager {
       player.wealth += 200;
       break;
 
-      case 'AVENUE':
+      case 'AVENUE': {
         const property = this.properties[player.currentIndex];
-        if (property.owner && property.owner !== player.id) this.payRent(player, property);
+        if (!property.owner) {
+          // Notify socketHandler to prompt buy decision
+          return { promptBuy: property };
+        } else if (property.owner !== player.id) {
+          // Automatically pay rent if owned by another player
+          this.payRent(player, property);
+        }
         break;
+      }
 
       case 'CHANCE':
       case 'COMMUNITY':
@@ -193,21 +200,27 @@ export class GameManager {
             player.wealth -= 200;
             break;
     
-        case 'ELECTRIC':
-          const eUtility = this.properties[player.currentIndex];
-          if (eUtility.owner && eUtility.owner !== player.id) {
-            const rentMultiplier = diceRoll;
-            this.payRent(player, eUtility, rentMultiplier);
+        case 'ELECTRIC':{
+          const property = this.properties[player.currentIndex];
+          if (!property.owner) {
+            // Notify socketHandler to prompt buy decision
+            return { promptBuy: property };
+          } else if (property.owner !== player.id) {
+            this.payRent(player, property, diceRoll);
           }
           break;
+        }
 
-        case 'WATER':
-          const wUtility = this.properties[player.currentIndex];
-          if (wUtility.owner && wUtility.owner !== player.id) {
-            const rentMultiplier = diceRoll
-            this.payRent(player, wUtility, rentMultiplier);
+        case 'WATER':{
+          const property = this.properties[player.currentIndex];
+          if (!property.owner) {
+            // Notify socketHandler to prompt buy decision
+            return { promptBuy: property };
+          } else if (property.owner !== player.id) {
+            this.payRent(player, property, diceRoll);
           }
           break;
+        }
 
       case 'PARKING':
         break;
@@ -215,12 +228,16 @@ export class GameManager {
       case 'VISITING':
         break
 
-      case 'RAILROADS':
-          const railroad = this.properties[player.currentIndex];
-          if (railroad.owner && railroad.owner !== player.id) {
-            this.payRent(player, railroad, 2);
-          }
-          break;
+      case 'RAILROADS': {
+        const property = this.properties[player.currentIndex];
+        if (!property.owner) {
+          // Notify socketHandler to prompt buy decision
+          return { promptBuy: property };
+        } else if (property.owner !== player.id) {
+          this.payRent(player, property, 2);
+        }
+        break;
+      }
         
       default:
         break;
@@ -231,8 +248,11 @@ export class GameManager {
     this.boardData.forEach((block, index) => {
       if (!block.type) console.error(`Block at index ${index} is missing a type`);
     });
-    return player.currentIndex
+    this.nextTurn();
+  return player.currentIndex;
   }
+ }
+
 
   private sendToJail(player: ServerPlayerData) {
     player.currentIndex = this.boardData.findIndex((space) => space.name === 'Jail');
@@ -307,7 +327,7 @@ private transformToClientPlayerData(serverPlayer: ServerPlayerData): ClientPlaye
     color: serverPlayer.color,
     currentIndex: serverPlayer.currentIndex,
     ownedProperties: serverPlayer.ownedProperties,
-    playerTurn: 0, // or calculate/set this if required
+    playerTurn: false, // or calculate/set this if required
     lastTurnBlockID: null, // or assign based on game logic if needed
     lastDiceValue: 0, // initialize or set accordingly
     getOutOfJailFree: serverPlayer.getOutOfJailFree,
