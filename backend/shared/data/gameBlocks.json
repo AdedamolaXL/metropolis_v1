@@ -58,9 +58,10 @@
   {
     "name": "Montparnasse Railroad",
     "type": "RAILROAD",
-    "pricetext": "$25",
+    "pricetext": "$200",
     "color": "#FFFFFF",
     "price": 200,
+    "baserent": 25,
     "groupNumber": 1,
     "imageName": "",
     "index": 5
@@ -122,7 +123,7 @@
     "index": 9
   },
   {
-    "name": "Just Visiting || Jail",
+    "name": "Jail",
     "type": "VISITING",
     "pricetext": "",
     "color": "#FFFFFF",
@@ -151,6 +152,7 @@
     "pricetext": "$150",
     "color": "#FFFFFF",
     "price": 150,
+    "baserent": 4,
     "groupNumber": 2,
     "imageName": "",
     "index": 12
@@ -190,9 +192,10 @@
   {
     "name": "Lyon Railroad",
     "type": "RAILROAD",
-    "pricetext": "$25",
+    "pricetext": "$200",
     "color": "#FFFFFF",
     "price": 200,
+    "baserent": 25,
     "groupNumber": 1,
     "imageName": "",
     "index": 15
@@ -320,9 +323,10 @@
   {
     "name": "North Railroad",
     "type": "RAILROAD",
-    "pricetext": "$25",
+    "pricetext": "$200",
     "color": "#FFFFFF",
     "price": 200,
+    "baserent": 25,
     "groupNumber": 1,
     "imageName": "",
     "index": 25
@@ -365,6 +369,7 @@
     "pricetext": "$150",
     "color": "#FFFFFF",
     "price": 150,
+    "baserent": 4,
     "groupNumber": 2,
     "imageName": "",
     "index": 28
@@ -452,9 +457,10 @@
   {
     "name": "Sainflazare Railroad",
     "type": "RAILROAD",
-    "pricetext": "$25",
+    "pricetext": "$200",
     "color": "#FFFFFF",
     "price": 200,
+    "baserent": 25,
     "groupNumber": 1,
     "imageName": "",
     "index": 35

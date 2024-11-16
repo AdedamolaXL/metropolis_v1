@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { monopolyInstance } from '../../models/Monopoly';
 import { Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from 'lucide-react';
 
+
+
 const DiceControl = () => {
   const [diceValues, setDiceValues] = useState<[number, number]>([1, 1]);
-  const [isCurrentPlayerTurn, setIsCurrentPlayerTurn] = useState<boolean>(false);
+  const [isTurn, setIsTurn] = useState<boolean>(false);
 
   useEffect(() => {
     const handleDiceRolled = ({ roll, currentIndex }: { roll: number, currentIndex: number }) => {
@@ -24,20 +26,27 @@ const DiceControl = () => {
     // Subscribe to 'diceRolled' event from the server
     monopolyInstance.socket.on('diceRolled', handleDiceRolled);
 
-    // Subscribe to 'turnChanged' event to check if it's the player's turn
-    monopolyInstance.socket.on('turnChanged', (nextPlayerId: string) => {
-      const currentPlayer = monopolyInstance.currentPlayer;
-      setIsCurrentPlayerTurn(currentPlayer?.id === nextPlayerId);
-      console.log('Turn changed:', nextPlayerId);
-    });
+    const handleTurnChanged = (nextPlayerId: string) => {
+      const currentPlayerId = monopolyInstance.currentPlayer?.id;
+      console.log("Turn changed:", { nextPlayerId, currentPlayerId });
+
+      const isCurrentTurn = currentPlayerId === nextPlayerId;
+      setIsTurn(isCurrentTurn);
+
+      console.log("Is it current player’s turn?", isCurrentTurn);
+    };
+    
+    monopolyInstance.socket.on('diceRolled', handleDiceRolled);
+    monopolyInstance.socket.on('turnChanged', handleTurnChanged);
 
     return () => {
       monopolyInstance.socket.off('diceRolled', handleDiceRolled);
+      monopolyInstance.socket.off('turnChanged', handleTurnChanged);
     };
   }, []);
 
   const handleRollDice = () => {
-    if (isCurrentPlayerTurn) {
+    if (!isTurn) {
       console.log("It's not your turn!");
     }
     console.log("Rolling the dice...");
@@ -75,6 +84,9 @@ const DiceControl = () => {
         <span>Total: {total}</span> {/* Render the total */}
       </div>
       <button onClick={handleRollDice} >Roll Dice</button>
+      {/* <div>
+        <p>Current Turn Status: {isTurn ? "Your Turn" : "Not Your Turn"}</p>
+      </div> */}
     </div>
   );
 };
