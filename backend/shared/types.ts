@@ -20,7 +20,7 @@ export interface ServerPlayerData extends BasePlayer {
 export interface ClientPlayerData extends BasePlayer {
   currentIndex: number;
   ownedProperties: Property[];
-  playerTurn: number;
+  playerTurn: boolean;
   lastTurnBlockID: string | null;
   lastDiceValue: number;
   getOutOfJailFree: number;

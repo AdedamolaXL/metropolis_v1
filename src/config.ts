@@ -1,12 +1,13 @@
 import { http, createConfig } from 'wagmi'
-import { base, mainnet } from 'wagmi/chains'
+import { taiko, hardhat, taikoHekla } from 'wagmi/chains'
 import {  metaMask } from 'wagmi/connectors'
 
 export const config = createConfig({
-  chains: [mainnet, base],
+  chains: [taiko, hardhat, taikoHekla],
   connectors: [ metaMask()],
   transports: {
-    [mainnet.id]: http(),
-    [base.id]: http(),
+    [taiko.id]: http(),
+    [taikoHekla.id]: http(),
+    [hardhat.id]: http(),
   },
 })

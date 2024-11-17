@@ -10,9 +10,10 @@ contract Metropolis is ERC1155, Ownable, AccessControl {
 	bytes32 public constant METROPOLIS_MINTER_ROLE =
 		keccak256("METROPOLIS_MINTER_ROLE");
 
-	uint256 private _currentTokenId = 1; // Start token IDs from 1
-
 	uint256 public constant MONOPOLY_MONEY_ID = 0;
+
+		// Add a property counter
+    uint256 public propertyCount = 0; 
 
 	// Property struct
 	struct Property {
@@ -24,7 +25,9 @@ contract Metropolis is ERC1155, Ownable, AccessControl {
 	mapping(uint256 => Property) public properties;
 
 	event PropertyPurchased(address player, uint256 propertyId);
-	event PropertyAdded(uint256 propertyId, string name); // Define the event
+	event PropertyAdded(uint256 propertyId, string name);
+
+
 
 	constructor() ERC1155("ipfs://") Ownable(msg.sender) {
 		_grantRole(METROPOLIS_MINTER_ROLE, _msgSender()); // Grant the minter role to the deployer
@@ -60,7 +63,9 @@ contract Metropolis is ERC1155, Ownable, AccessControl {
 				properties[propertyId].price,
 			"Insufficient funds"
 		);
-
+		// The _burn function is used here to simulate the payment for the property.
+		// When a player buys a property, they essentially exchange their Monopoly money for ownership of that property.
+		// The _burn function achieves this by destroying the specified amount of Monopoly money tokens from the player's balance.
 		_burn(msg.sender, MONOPOLY_MONEY_ID, properties[propertyId].price);
 		_mint(msg.sender, propertyId, 1, "");
 
@@ -84,19 +89,18 @@ contract Metropolis is ERC1155, Ownable, AccessControl {
 	}
 
 	function addProperty(
+		uint256 id,
 		string memory name,
 		uint256 price,
 		uint256[] memory rentLevels
 	) public onlyOwner {
-		uint256 tokenId = _currentTokenId;
-		_currentTokenId++;
-
-		properties[tokenId] = Property({
+		properties[id] = Property({
 			name: name,
 			price: price,
 			rentLevels: rentLevels // Store the rent levels array
 		});
-		emit PropertyAdded(tokenId, name); // Emit the event with property ID and name
+		propertyCount++;
+		emit PropertyAdded(id, name); // Emit the event with property ID and name
 	}
 
 	function updateProperty(
@@ -131,16 +135,15 @@ contract Metropolis is ERC1155, Ownable, AccessControl {
 	}
 
 	// Function to get all properties
-	function getAllProperties() public view returns (Property[] memory) {
-		uint256 totalProperties = _currentTokenId - 1; // Exclude token ID 0 (Monopoly money)
-		Property[] memory allProps = new Property[](totalProperties);
+    function getAllProperties() public view returns (Property[] memory) {
+        Property[] memory allProps = new Property[](propertyCount);
 
-		for (uint256 i = 1; i <= totalProperties; i++) {
-			allProps[i - 1] = properties[i];
-		}
+        for (uint256 i = 0; i < propertyCount; i++) {
+            allProps[i] = properties[i + 1]; // Access properties from ID 1 onwards
+        }
 
-		return allProps;
-	}
+        return allProps;
+    }
 
 	// Override supportsInterface function
 	function supportsInterface(

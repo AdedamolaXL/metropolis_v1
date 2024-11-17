@@ -32,7 +32,7 @@ describe("Metropolis", function () {
             const [owner, player1] = await ethers.getSigners();
 
             // Add a property
-            await Metropolis.addProperty("Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
+            await Metropolis.addProperty(1, "Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
 
             // Mint Monopoly money to player1
             await Metropolis.mintMonopolyMoney(player1.address, 1000);
@@ -65,7 +65,7 @@ describe("Metropolis", function () {
             const [owner, player1] = await ethers.getSigners();
 
             // Add a property
-            await Metropolis.addProperty("Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
+            await Metropolis.addProperty(1,"Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
 
             // Mint insufficient Monopoly money to player1
             await Metropolis.mintMonopolyMoney(player1.address, 50);
@@ -110,7 +110,7 @@ describe("Metropolis", function () {
             const { Metropolis } = await setup();
         
             // Add a property with rent levels
-            await Metropolis.addProperty("Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]); 
+            await Metropolis.addProperty(1, "Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]); 
         
             // Update the property with new rent levels
             await Metropolis.updateProperty(1, "Updated Name", 100, [5, 25, 75, 225, 400, 625]); 
@@ -134,7 +134,7 @@ describe("Metropolis", function () {
             const [, player1] = await ethers.getSigners();
 
             // Add a property
-            await Metropolis.addProperty("Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
+            await Metropolis.addProperty(1, "Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
 
             // Try to update the property from a non-owner account
             await expect(Metropolis.connect(player1).updateProperty(1, "Updated Name", 100, [5, 25, 75, 225, 400, 625]))
@@ -156,8 +156,8 @@ describe("Metropolis", function () {
             const { Metropolis } = await setup();
 
             // Add some properties
-            await Metropolis.addProperty("Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
-            await Metropolis.addProperty("Baltic Avenue", 60, [4, 20, 60, 180, 320, 450]);
+            await Metropolis.addProperty(1, "Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
+            await Metropolis.addProperty(2, "Baltic Avenue", 60, [4, 20, 60, 180, 320, 450]);
 
             // Get property with ID 1
             const property = await Metropolis.getProperty(1);
@@ -178,9 +178,9 @@ describe("Metropolis", function () {
             const { Metropolis } = await setup();
 
             // Add some properties
-            await Metropolis.addProperty("Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
-            await Metropolis.addProperty("Baltic Avenue", 60, [4, 20, 60, 180, 320, 450]);
-            await Metropolis.addProperty("Oriental Avenue", 100, [6, 30, 90, 270, 400, 550]);
+            await Metropolis.addProperty(1, "Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250]);
+            await Metropolis.addProperty(2, "Baltic Avenue", 60, [4, 20, 60, 180, 320, 450]);
+            await Metropolis.addProperty(3, "Oriental Avenue", 100, [6, 30, 90, 270, 400, 550]);
 
             // Get all properties
             const properties = await Metropolis.getAllProperties();
