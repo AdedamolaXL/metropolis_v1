@@ -151,7 +151,7 @@ export class GameManager {
     this.players.add(newPlayer);
     this.walletToPlayerMap.set(walletAddress, newPlayer)
     await this.mintFunds(walletAddress, 1500);
-    console.log("Monopoly Money minted to,:", walletAddress);
+    console.log("Metropolis MET minted to:", walletAddress, 1500);
     console.log(`Player ${name} added successfully with color ${availableColor}`);
     return newPlayer;
   }
