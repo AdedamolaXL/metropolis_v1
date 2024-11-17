@@ -52,9 +52,9 @@ const StartScreen: React.FC = () => {
           functionName: 'mintMonopolyMoney',
           args: [address, 1500], 
         });
-  
+
         const result = await writeContract(config, request); // Use the request from simulateContract
-  
+
         console.log('Sent 1500 token to:', address); 
       } catch (error) {
         console.error('Error buying property:', error);
@@ -63,7 +63,6 @@ const StartScreen: React.FC = () => {
       showToast('Please enter your name');
     }
   };
-
 
   return (
     <div className="start-screen">
@@ -93,7 +92,7 @@ const StartScreen: React.FC = () => {
         <button onClick={handleJoinGame} disabled={isJoining} className="input active">
           {isJoining ? 'Joining...' : 'Join Game'}
         </button>
-        
+
         {gameState && gameState.players.length > 0 && (
           <div className="current-players">
             <h3>Current Players:</h3>
@@ -110,4 +109,3 @@ const StartScreen: React.FC = () => {
 };
 
 export default StartScreen;
-

@@ -17,8 +17,8 @@ const provider = new ethers.JsonRpcProvider(process.env.TAIKO_TESTNET_RPC)
 const privateKey = process.env.TESTNET_PRIVATE_KEYS ? process.env.TESTNET_PRIVATE_KEYS : ""
 const signer = new ethers.Wallet(privateKey, provider)
 
-const contractAddress = require('../../metropolis_contracts/deployments/localhost/Metropolis.json').address
-const abi = require('../../metropolis_contracts/deployments/localhost/Metropolis.json').abi
+const contractAddress = '0xB8bEb46C16eE24b25d1c46824a9296918261b1c2';
+const abi = require('../../metropolis_contracts/artifacts/contracts/MetropolisBase.sol/MetropolisBase.json').abi
 
 const contract = new ethers.Contract(contractAddress, abi, signer)
 
@@ -150,7 +150,7 @@ export class GameManager {
 
     this.players.add(newPlayer);
     this.walletToPlayerMap.set(walletAddress, newPlayer)
-    await this.mintMonopolyMoney(walletAddress, 1500);
+    await this.mintFunds(walletAddress, 1500);
     console.log("Monopoly Money minted to,:", walletAddress);
     console.log(`Player ${name} added successfully with color ${availableColor}`);
     return newPlayer;
@@ -161,9 +161,9 @@ export class GameManager {
    * @param toAddress - The recipient's wallet address.
    * @param amount - The amount of tokens to mint, parsed in ether format.
    */
-  async mintMonopolyMoney(toAddress: string, amount: number): Promise<void> {
+  async mintFunds(toAddress: string, amount: number): Promise<void> {
     try {
-      const tx = await contract.mintMonopolyMoney(toAddress, amount);
+      const tx = await contract.mintFunds(toAddress, amount);
       console.log("Transaction sent:", tx.hash);
       const receipt = await tx.wait();
       console.log("Monopoly Money minted, confirmed in block:", receipt.blockNumber);

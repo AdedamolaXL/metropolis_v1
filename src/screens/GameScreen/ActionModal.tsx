@@ -9,6 +9,8 @@ interface ActionModalProps {
   onDrawCard: () => void;
   isOwned: boolean;
   isCurrentPlayer: boolean;
+  isLoading: boolean;
+  playerBalance: bigint;
 }
 
 const ActionModal: React.FC<ActionModalProps> = ({

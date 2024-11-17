@@ -55,6 +55,13 @@ const config: HardhatUserConfig = {
       accounts: [process.env.TESTNET_PRIVATE_KEYS],
       //gasPrice: 350000000000
     },
+    holesky: {
+      url: `https://eth-holesky.g.alchemy.com/v2/${providerApiKey}`,
+      accounts: [process.env.HOLESKY_PRIVATE_KEYS],
+      gasPrice: "auto",
+      gas: "auto",
+      timeout: 200000,
+    },
     sepolia: {
       url: `https://eth-sepolia.g.alchemy.com/v2/${providerApiKey}`,
       accounts: [deployerPrivateKey],
