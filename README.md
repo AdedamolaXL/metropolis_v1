@@ -15,9 +15,9 @@ bun run dev
 
 # metropolis_contracts
 
-mainnet - 0x1afbcd65198e8d7f75800be2a72e92d5a7d475a7
-testnet - 0xB8bEb46C16eE24b25d1c46824a9296918261b1c2
-node version v20.9.0 for the contracts (maybe same version works also for the frontend and backend)
+* mainnet - 0x1afbcd65198e8d7f75800be2a72e92d5a7d475a7
+* testnet - 0xB8bEb46C16eE24b25d1c46824a9296918261b1c2
+- node version v20.9.0 for the contracts (maybe same version works also for the frontend and backend)
 
 
 ## start chain
